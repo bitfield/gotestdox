@@ -28,7 +28,12 @@ func TestSentence(t *testing.T) {
 			want:  "To valid UTF 8",
 		},
 		{
-			name:  "knows that just 'Test' is a valid test name",
+			name:  "treats numbers as word separators",
+			input: "TestFooDoes8Things",
+			want:  "Foo does 8 things",
+		},
+		{
+			name:  "knows that just Test is a valid test name",
 			input: "Test",
 			want:  "",
 		},
@@ -57,6 +62,31 @@ func TestSentence(t *testing.T) {
 			input: "TestMatch",
 			want:  "Match",
 		},
+		{
+			name:  "treats a single underscore as marking the end of a multi-word function name",
+			input: "TestFindFiles_WorksCorrectly",
+			want:  "FindFiles works correctly",
+		},
+		{
+			name:  "treats a single underscore before the first slash as marking the end of a multi-word function name",
+			input: "TestFindFiles_/WorksCorrectly",
+			want:  "FindFiles works correctly",
+		},
+		{
+			name:  "eliminates any words containing underscores after splitting",
+			input: "TestSentence/does_x,_correctly",
+			want:  "Sentence does x correctly",
+		},
+		{
+			name:  "retains hyphenated words in their original form",
+			input: "TestFoo/has_well-formed_output",
+			want:  "Foo has well-formed output",
+		},
+		{
+			name:  "retains apostrophised words in their original form",
+			input: "TestFoo/does_what's_required",
+			want:  "Foo does what's required",
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
@@ -68,7 +98,74 @@ func TestSentence(t *testing.T) {
 	}
 }
 
-func TestParseJSONCorrectlyParsesASingleGoTestJSONOutputLine(t *testing.T) {
+func TestExtractFuncName_(t *testing.T) {
+	t.Parallel()
+	tcs := []struct {
+		name, input, funcName, behaviour string
+	}{
+		{
+			name:      "matches the first camel-case word if there are no slashes or underscores",
+			input:     "SumCorrectlySumsInputNumbers",
+			funcName:  "Sum",
+			behaviour: "CorrectlySumsInputNumbers",
+		},
+		{
+			name:      "treats a single underscore as marking the end of a multi-word function name",
+			input:     "FindFiles_WorksCorrectly",
+			funcName:  "FindFiles",
+			behaviour: "_WorksCorrectly",
+		},
+		{
+			name:      "treats a single underscore before the first slash as marking the end of a multi-word function name",
+			input:     "FindFiles_/WorksCorrectly",
+			funcName:  "FindFiles",
+			behaviour: "_/WorksCorrectly",
+		},
+		{
+			name:      "treats multiple underscores as word breaks",
+			input:     "_Foo_GeneratesValidPDFFile",
+			funcName:  "Foo",
+			behaviour: "_GeneratesValidPDFFile",
+		},
+		{
+			name:      "correctly extracts func name from a subtest",
+			input:     "Slice/Empty_line_between_two_existing_lines",
+			funcName:  "Slice",
+			behaviour: "/Empty_line_between_two_existing_lines",
+		},
+		{
+			name:      "without an underscore before a slash, treats camel case as word breaks",
+			input:     "SliceSink/Empty_line_between_two_existing_lines",
+			funcName:  "Slice",
+			behaviour: "Sink/Empty_line_between_two_existing_lines",
+		},
+		{
+			name:      "doesn't break if the test is named just Test",
+			input:     "",
+			funcName:  "",
+			behaviour: "",
+		},
+		{
+			name:      "doesn't break if the test is named just Test_",
+			input:     "_",
+			funcName:  "",
+			behaviour: "",
+		},
+	}
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			funcName, behaviour := testgox.ExtractFuncName(tc.input)
+			if tc.funcName != funcName {
+				t.Errorf("%s\ninput: %q:\nfuncName: %s", tc.name, tc.input, cmp.Diff(tc.funcName, funcName))
+			}
+			if tc.behaviour != behaviour {
+				t.Errorf("%s\ninput: %q:\nbehaviour: %s", tc.name, tc.input, cmp.Diff(tc.behaviour, behaviour))
+			}
+		})
+	}
+}
+
+func TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine(t *testing.T) {
 	t.Parallel()
 	input := `{"Time":"2022-02-28T15:53:43.532326Z","Action":"pass","Package":"github.com/bitfield/script","Test":"TestFindFilesInNonexistentPathReturnsError","Elapsed":0.12}`
 	want := testgox.Event{
@@ -87,7 +184,7 @@ func TestParseJSONCorrectlyParsesASingleGoTestJSONOutputLine(t *testing.T) {
 	}
 }
 
-func TestEventStringFormatsPassEventsWithATick(t *testing.T) {
+func TestEventString_FormatsPassEventsWithATick(t *testing.T) {
 	t.Parallel()
 	input := testgox.Event{
 		Action:  "pass",
@@ -101,7 +198,7 @@ func TestEventStringFormatsPassEventsWithATick(t *testing.T) {
 	}
 }
 
-func TestEventStringFormatsFailEventsWithACross(t *testing.T) {
+func TestEventString_FormatsFailEventsWithACross(t *testing.T) {
 	t.Parallel()
 	input := testgox.Event{
 		Action:  "fail",
