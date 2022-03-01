@@ -138,7 +138,47 @@ In other words, it's a good idea to name each subtest so that it completes a sen
 
 When you use `testgox`, you write test names as descriptive sentences quite naturally, without you having to think about it too much—which is the point, of course.
 
+# More examples
+
+Here is the complete `testgox` rendering of its own tests (sorted for readability), in case it gives you any useful ideas:
+
+```
+ ✔ EventString formats fail events with a cross (0.00s)
+ ✔ EventString formats pass events with a tick (0.00s)
+ ✔ ExtractFuncName (0.00s)
+ ✔ ExtractFuncName correctly extracts func name from a subtest (0.00s)
+ ✔ ExtractFuncName doesn't break if the test is named just test (0.00s)
+ ✔ ExtractFuncName doesn't break if the test is named just test followed by an underscore (0.00s)
+ ✔ ExtractFuncName matches the first camel-case word if there are no slashes or underscores (0.00s)
+ ✔ ExtractFuncName treats a single underscore as marking the end of a multi-word function name (0.00s)
+ ✔ ExtractFuncName treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)
+ ✔ ExtractFuncName treats multiple underscores as word breaks (0.00s)
+ ✔ ExtractFuncName without an underscore before a slash treats camel case as word breaks (0.00s)
+ ✔ ParseJSON correctly parses a single go test JSON output line (0.00s)
+ ✔ Relevant is false for other events (0.00s)
+ ✔ Relevant is true for test pass or fail events (0.00s)
+ ✔ Sentence (0.00s)
+ ✔ Sentence correctly renders a well-formed test name (0.00s)
+ ✔ Sentence doesn't incorrectly title-case single-letter words (0.00s)
+ ✔ Sentence eliminates any words containing underscores after splitting (0.00s)
+ ✔ Sentence handles multiple underscores with the first marking the end of a multi-word function name (0.00s)
+ ✔ Sentence inserts a word break before subtest names beginning with a lowercase letter (0.00s)
+ ✔ Sentence is okay with test names not in the form of a sentence (0.00s)
+ ✔ Sentence knows that just test is a valid test name (0.00s)
+ ✔ Sentence preserves initialisms such as PDF (0.00s)
+ ✔ Sentence preserves more initialisms (0.00s)
+ ✔ Sentence renders subtest names without the slash and with underscores replaced by spaces (0.00s)
+ ✔ Sentence retains apostrophised words in their original form (0.00s)
+ ✔ Sentence retains hyphenated words in their original form (0.00s)
+ ✔ Sentence treats a single underscore as marking the end of a multi-word function name (0.00s)
+ ✔ Sentence treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)
+ ✔ Sentence treats numbers as word separators (0.00s)
+ ✔ Sentence treats underscores as word breaks (0.00s)
+ ```
+
 # Bugs
+
+## Quoted words in subtests
 
 Right now it doesn't cope well with subtest names containing quoted words. For example, this subtest of `Sentence`:
 
@@ -154,4 +194,16 @@ is rendered as:
 
 Note that the opening quote has been lost. I haven't found any way to fix this that doesn't also break everything else. Contributions welcome.
 
-I'd also like to hear about any odd renderings of (reasonable) test names and how you think they could be improved.
+## Lonely test names
+
+When a test (such as `TestSentence`) has subtests, each of those subtests will be correctly printed as its own sentence. However, we'll also get a sentence just containing the test name on its own:
+
+```
+ ✔ Sentence (0.00s)
+```
+
+I'm not sure how to fix this without keeping track of some kind of state information, as Go's JSON test data doesn't tell you whether or not a given test has subtests. We could store all the results and then filter out such bogus lines, but I prefer to see each line printed as the test runs, without having to wait for them all to finish.
+
+## Your bug here
+
+I'd also like to hear about any odd renderings of (reasonable) test names and how you think they could be improved. Please open an issue with the details.

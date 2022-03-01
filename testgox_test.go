@@ -18,7 +18,7 @@ func TestSentence(t *testing.T) {
 			want:  "Sum correctly sums input numbers",
 		},
 		{
-			name:  "preserves initialisms such as 'PDF'",
+			name:  "preserves initialisms such as PDF",
 			input: "TestFooGeneratesValidPDFFile",
 			want:  "Foo generates valid PDF file",
 		},
@@ -151,7 +151,7 @@ func TestExtractFuncName_(t *testing.T) {
 			behaviour: "",
 		},
 		{
-			name:      "doesn't break if the test is named just Test_",
+			name:      "doesn't break if the test is named just Test followed by an underscore",
 			input:     "_",
 			funcName:  "",
 			behaviour: "",
