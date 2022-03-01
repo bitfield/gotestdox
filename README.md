@@ -95,7 +95,7 @@ Handle foo does bar
 
 To deal with this, there's one extra rule specific to `testgox`:
 
-* If the test name contains exactly one underscore before the first slash, it's interpreted as marking the end of a multi-word function name: `HandleFoo_DoesBar` -> `HandleFoo does bar`.
+* If the test name contains at least one underscore, the first underscore is interpreted as marking the end of a multi-word function name: `HandleFoo_DoesBar` -> `HandleFoo does bar`.
 
 This isn't great, but I can't think of any better way to handle this at the moment. At least it means you can write test names for multi-word functions without them looking _too_ weird.
 

@@ -73,6 +73,11 @@ func TestSentence(t *testing.T) {
 			want:  "FindFiles works correctly",
 		},
 		{
+			name:  "handles multiple underscores, with the first marking the end of a multi-word function name",
+			input: "TestFindFiles_Does_Stuff",
+			want:  "FindFiles does stuff",
+		},
+		{
 			name:  "eliminates any words containing underscores after splitting",
 			input: "TestSentence/does_x,_correctly",
 			want:  "Sentence does x correctly",
