@@ -15,9 +15,11 @@ TestRelevantIsTrueForTestPassOrFailEvents
 TestRelevantIsFalseForOtherEvents
 ```
 
-We can transform them into straightforward sentences that express the desired behaviour, by piping our JSON test output through `gotestdox`:
+We can transform them into straightforward sentences that express the desired behaviour, by running `gotestdox`:
 
-**`go test -json |gotestdox`**
+**`gotestdox`**
+
+This will run the tests, and print:
 
 ```
  ✔ Relevant is true for test pass or fail events (0.00s)
@@ -105,9 +107,29 @@ The intent is not to *perfectly* render all sensible test names as sentences, in
 
 In other words, `gotestdox` is not the thing. It's the thing that gets us to the thing, the end goal being meaningful test names (I like the term _literate_ test names).
 
+# Getting fancy
+
+`gotestdox`, with no arguments, will run the command `go test -json` and process its output.
+
+Any arguments you supply will be passed on to `go test`. For example:
+
+**`gotestdox -run ParseJSON`**
+
+will run the command:
+
+`go test -json -run ParseJSON`
+
+You can supply a list of packages to test, or any other arguments or flags understood by `go test`. However, `gotestdox` only prints events about *tests* (ignoring benchmarks and examples).
+
+If you want to run `go test -json` yourself, for example as part of a shell pipeline, and pipe its output into `gotestdox`, you can do that too:
+
+**`go test -json | gotestdox`**
+
+If `gotestdox` detects that its input is not attached to a terminal, it will wait for you to pipe JSON data into it. Otherwise, it will run the tests for you and process the output.
+
 # Hints
 
-`gotestdox` encourages you to create subtests with descriptive names, because the results read nicely. For example, here's a snippet of one of its own tests:
+`gotestdox` encourages you to create tests and subtests with descriptive names, because the results read nicely. For example, here's a snippet of one of its own tests:
 
 ```go
 func TestSentence(t *testing.T) {

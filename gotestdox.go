@@ -1,12 +1,47 @@
 package gotestdox
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/exec"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 )
+
+func ExecGoTest() {
+	args := []string{"test", "-json"}
+	args = append(args, os.Args[1:]...)
+	cmd := exec.Command("go", args...)
+	input, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+	Filter(input)
+	if err := cmd.Wait(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Filter(input io.ReadCloser) {
+	scanner := bufio.NewScanner(input)
+	for scanner.Scan() {
+		event, err := ParseJSON(scanner.Text())
+		if err != nil {
+			continue
+		}
+		if event.Relevant() {
+			fmt.Println(event)
+		}
+	}
+}
 
 // Based on https://github.com/fatih/camelcase, used under MIT licence
 func SplitCamelCase(src string) (entries []string) {
