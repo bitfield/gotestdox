@@ -1,9 +1,9 @@
-package testgox_test
+package gotestdox_test
 
 import (
 	"testing"
 
-	"github.com/bitfield/testgox"
+	"github.com/bitfield/gotestdox"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -95,7 +95,7 @@ func TestSentence(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			got := testgox.Sentence(tc.input)
+			got := gotestdox.Sentence(tc.input)
 			if tc.want != got {
 				t.Errorf("%s:\ninput: %q:\nresult: %s", tc.name, tc.input, cmp.Diff(tc.want, got))
 			}
@@ -159,7 +159,7 @@ func TestExtractFuncName_(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			funcName, behaviour := testgox.ExtractFuncName(tc.input)
+			funcName, behaviour := gotestdox.ExtractFuncName(tc.input)
 			if tc.funcName != funcName {
 				t.Errorf("%s\ninput: %q:\nfuncName: %s", tc.name, tc.input, cmp.Diff(tc.funcName, funcName))
 			}
@@ -173,14 +173,14 @@ func TestExtractFuncName_(t *testing.T) {
 func TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine(t *testing.T) {
 	t.Parallel()
 	input := `{"Time":"2022-02-28T15:53:43.532326Z","Action":"pass","Package":"github.com/bitfield/script","Test":"TestFindFilesInNonexistentPathReturnsError","Elapsed":0.12}`
-	want := testgox.Event{
+	want := gotestdox.Event{
 		Action:  "pass",
 		Package: "github.com/bitfield/script",
 		Test:    "TestFindFilesInNonexistentPathReturnsError",
 		Elapsed: 0.12,
 	}
 
-	got, err := testgox.ParseJSON(input)
+	got, err := gotestdox.ParseJSON(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine(t *testing.T) {
 
 func TestEventString_FormatsPassEventsWithATick(t *testing.T) {
 	t.Parallel()
-	input := testgox.Event{
+	input := gotestdox.Event{
 		Action:  "pass",
 		Test:    "TestFooDoesX",
 		Elapsed: 0.01,
@@ -205,7 +205,7 @@ func TestEventString_FormatsPassEventsWithATick(t *testing.T) {
 
 func TestEventString_FormatsFailEventsWithACross(t *testing.T) {
 	t.Parallel()
-	input := testgox.Event{
+	input := gotestdox.Event{
 		Action:  "fail",
 		Test:    "TestFooDoesX",
 		Elapsed: 0.01,
@@ -219,7 +219,7 @@ func TestEventString_FormatsFailEventsWithACross(t *testing.T) {
 
 func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 	t.Parallel()
-	tcs := []testgox.Event{
+	tcs := []gotestdox.Event{
 		{
 			Action: "pass",
 			Test:   "TestFooDoesX",
@@ -239,7 +239,7 @@ func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 
 func TestRelevantIsFalseForOtherEvents(t *testing.T) {
 	t.Parallel()
-	tcs := []testgox.Event{
+	tcs := []gotestdox.Event{
 		{
 			Action: "pass",
 			Test:   "ExampleFooDoesX",

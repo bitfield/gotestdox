@@ -1,4 +1,4 @@
-package testgox
+package gotestdox
 
 import (
 	"encoding/json"

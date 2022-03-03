@@ -1,4 +1,4 @@
-module github.com/bitfield/testgox
+module github.com/bitfield/gotestdox
 
 go 1.18
 

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bitfield/testgox"
+	"github.com/bitfield/gotestdox"
 )
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		event, err := testgox.ParseJSON(scanner.Text())
+		event, err := gotestdox.ParseJSON(scanner.Text())
 		if err != nil {
 			continue
 		}
