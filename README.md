@@ -22,8 +22,10 @@ We can transform them into straightforward sentences that express the desired be
 
 This will run the tests, and print:
 
- ✔ Relevant is true for test pass or fail events (0.00s)\
+```
+ ✔ Relevant is true for test pass or fail events (0.00s)
  ✔ Relevant is false for other events (0.00s)
+```
 
 # Why
 
@@ -81,7 +83,7 @@ TestHandleInputClosesInputAfterReading
 Unless we do something, this will be rendered as:
 
 ```
-Handle input closes input after reading
+ ✔ Handle input closes input after reading
 ```
 
 To let us give `gotestdox` a hint about this, there's one extra transformation rule: the first underscore marks the end of the function name. So we can name our test like this:
@@ -93,7 +95,7 @@ TestHandleInput_ClosesInputAfterReading
 and this becomes:
 
 ```
-HandleInput closes input after reading
+ ✔ HandleInput closes input after reading
 ```
 
 I think this is an acceptable compromise: the `gotestdox` output is much more readable, while the extra underscore in the test name doesn't seriously interfere with its readability.
@@ -178,7 +180,7 @@ When we see that sentence, it's helpful, but it also immediately prompts us to t
 TestMatchIsFalseForNonMatchingInput
 ```
 
-We haven't just improved the names of our existing tests; we've actually generated new test cases. That's powerful. When we describe some particular case explicitly, it's easy to see what *other* possibilities we haven't tested.
+We haven't just improved the names of our existing tests; we've actually generated new test cases. That's powerful. When we're forced to describe some particular case explicitly, it becomes obvious what *other* possibilities exist that we haven't yet tested.
 
 ## The friendly manual
 
@@ -234,37 +236,39 @@ When you've used `gotestdox` a little, it starts to feel perfectly natural to wr
 
 Here is the complete `gotestdox` rendering of its own tests (sorted for readability), in case it gives you any useful ideas:
 
- ✔ EventString formats fail events with a cross (0.00s)\
- ✔ EventString formats pass events with a tick (0.00s)\
- ✔ ExtractFuncName (0.00s)\
- ✔ ExtractFuncName correctly extracts func name from a subtest (0.00s)\
- ✔ ExtractFuncName doesn't break if the test is named just test (0.00s)\
- ✔ ExtractFuncName doesn't break if the test is named just test followed by an underscore (0.00s)\
- ✔ ExtractFuncName matches the first camel-case word if there are no slashes or underscores (0.00s)\
- ✔ ExtractFuncName treats a single underscore as marking the end of a multi-word function name (0.00s)\
- ✔ ExtractFuncName treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)\
- ✔ ExtractFuncName treats multiple underscores as word breaks (0.00s)\
- ✔ ExtractFuncName without an underscore before a slash treats camel case as word breaks (0.00s)\
- ✔ ParseJSON correctly parses a single go test JSON output line (0.00s)\
- ✔ Relevant is false for other events (0.00s)\
- ✔ Relevant is true for test pass or fail events (0.00s)\
- ✔ Sentence (0.00s)\
- ✔ Sentence correctly renders a well-formed test name (0.00s)\
- ✔ Sentence doesn't incorrectly title-case single-letter words (0.00s)\
- ✔ Sentence eliminates any words containing underscores after splitting (0.00s)\
- ✔ Sentence handles multiple underscores with the first marking the end of a multi-word function name (0.00s)\
- ✔ Sentence inserts a word break before subtest names beginning with a lowercase letter (0.00s)\
- ✔ Sentence is okay with test names not in the form of a sentence (0.00s)\
- ✔ Sentence knows that just test is a valid test name (0.00s)\
- ✔ Sentence preserves initialisms such as PDF (0.00s)\
- ✔ Sentence preserves more initialisms (0.00s)\
- ✔ Sentence renders subtest names without the slash and with underscores replaced by spaces (0.00s)\
- ✔ Sentence retains apostrophised words in their original form (0.00s)\
- ✔ Sentence retains hyphenated words in their original form (0.00s)\
- ✔ Sentence treats a single underscore as marking the end of a multi-word function name (0.00s)\
- ✔ Sentence treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)\
- ✔ Sentence treats numbers as word separators (0.00s)\
+```
+ ✔ EventString formats fail events with a cross (0.00s)
+ ✔ EventString formats pass events with a tick (0.00s)
+ ✔ ExtractFuncName (0.00s)
+ ✔ ExtractFuncName correctly extracts func name from a subtest (0.00s)
+ ✔ ExtractFuncName doesn't break if the test is named just test (0.00s)
+ ✔ ExtractFuncName doesn't break if the test is named just test followed by an underscore (0.00s)
+ ✔ ExtractFuncName matches the first camel-case word if there are no slashes or underscores (0.00s)
+ ✔ ExtractFuncName treats a single underscore as marking the end of a multi-word function name (0.00s)
+ ✔ ExtractFuncName treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)
+ ✔ ExtractFuncName treats multiple underscores as word breaks (0.00s)
+ ✔ ExtractFuncName without an underscore before a slash treats camel case as word breaks (0.00s)
+ ✔ ParseJSON correctly parses a single go test JSON output line (0.00s)
+ ✔ Relevant is false for other events (0.00s)
+ ✔ Relevant is true for test pass or fail events (0.00s)
+ ✔ Sentence (0.00s)
+ ✔ Sentence correctly renders a well-formed test name (0.00s)
+ ✔ Sentence doesn't incorrectly title-case single-letter words (0.00s)
+ ✔ Sentence eliminates any words containing underscores after splitting (0.00s)
+ ✔ Sentence handles multiple underscores with the first marking the end of a multi-word function name (0.00s)
+ ✔ Sentence inserts a word break before subtest names beginning with a lowercase letter (0.00s)
+ ✔ Sentence is okay with test names not in the form of a sentence (0.00s)
+ ✔ Sentence knows that just test is a valid test name (0.00s)
+ ✔ Sentence preserves initialisms such as PDF (0.00s)
+ ✔ Sentence preserves more initialisms (0.00s)
+ ✔ Sentence renders subtest names without the slash and with underscores replaced by spaces (0.00s)
+ ✔ Sentence retains apostrophised words in their original form (0.00s)
+ ✔ Sentence retains hyphenated words in their original form (0.00s)
+ ✔ Sentence treats a single underscore as marking the end of a multi-word function name (0.00s)
+ ✔ Sentence treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)
+ ✔ Sentence treats numbers as word separators (0.00s)
  ✔ Sentence treats underscores as word breaks (0.00s)
+```
 
 # Links
 
