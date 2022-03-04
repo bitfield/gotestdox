@@ -166,21 +166,47 @@ That's very unhelpful. To find out what this test thinks *should* have happened,
 
 Of course, a good test will also give us specific information about the failure: if `want` wasn't equal to `got`, it will tell us that. But we still don't know why `want` is *supposed* to equal `got`. In other words, we're missing some critical information: what is the test actually *about*?
 
-We need to switch from thinking about the test name as a piece of useless paperwork, and start thinking about it as documentation. As soon as we do that, it's clear that the name should be a sentence expressing what should happen when the code under test is correct:
+We need to switch from thinking about the test name as a piece of useless paperwork to thinking about it as documentation. As soon as we do that, it's clear that the name should be a sentence expressing what happens when the code under test is correct:
 
 ```
 Match is true for matching input
 ```
 
+In fact, let's lean into this and call them “test sentences” instead of “test names”. That'll prompt us every time we write one: “What's the sentence for this test?”
+
 ## Under what circumstances?
 
-When we see that sentence, it's helpful, but it also immediately prompts us to think, "well, what about *non*-matching input?" Okay. That's another test, then:
+When we see this test sentence, it's helpful, but it also immediately prompts us to think, “well, what about *non*-matching input?” Okay. That's another test, then:
 
 ```
 TestMatchIsFalseForNonMatchingInput
 ```
 
 We haven't just improved the names of our existing tests; we've actually generated new test cases. That's powerful. When we're forced to describe some particular case explicitly, it becomes obvious what *other* possibilities exist that we haven't yet tested.
+
+> I see a lot of Go unit tests without the condition, just a list of expectations (or contrariwise, just a list of states without expectations). Either way, it can easily lead to blind spots, things you are not testing that you should be. Let’s include both condition and expectation:
+
+> HandleCategory trims LEADING spaces from valid category\
+> HandleCategory trims TRAILING spaces from valid category\
+> HandleCategory trims LEADING and TRAILING spaces from valid category
+
+> Immediately upon reading those, I bet you noticed we are missing some tests (and/or requirements!). What happens if we give an empty category? Or an invalid category? What constitutes a valid category?\
+—Michael Sorens, [Go Unit Tests: Tips from the Trenches](https://www.red-gate.com/simple-talk/devops/testing/go-unit-tests-tips-from-the-trenches/)
+
+## “Does”, not “should”
+
+It's tempting to include “should” in every test sentence, especially if we're writing the test first:
+
+```
+Match should be true for matching input
+```
+
+I don't think that's necessary, and we can keep our test sentences short and to the point by omitting words like “should”, “must”, and “will”. Just say what it *does*. A good way to think of this is that every test sentence implicitly ends with the words “...when the code is correct”.
+
+We wouldn't say that Match *should* be true when the code is correct, we would say it *is* true! This isn't an aspiration, it's a definition. The definition of “correct” is that Match is true for matching input, and false otherwise.
+
+> The test itself has a name, which can convey useful information if we choose it wisely. It’s a good idea to name each test function after the behaviour it tests. You don’t need to use words like Should, or Must; these are implicit. Just say what the function does when it’s working correctly.\
+—[The Power of Go: Tools](https://bitfieldconsulting.com/books/tools)
 
 ## The friendly manual
 
@@ -191,9 +217,9 @@ And that's it! Now we have two sentences that completely describe the important 
  ✔ Match is false for non matching input (0.00s)
  ```
 
-As you accumulate more tests over time, your `gotestdox` output will be a more and more valuable user manual for your package. And that's the right way to think about it. Good tests should focus on *user-visible* behaviour: your public API. So your tests should be named using domain terms that users understand ("A user can log in"), not computer jargon ("Initialize persistent session").
+As you accumulate more tests over time, your `gotestdox` output will be a more and more valuable user manual for your package. And that's the right way to think about it. Good tests should focus on *user-visible* behaviour: your public API. So your tests should be named using domain terms that users understand (“A user can log in”), not computer jargon (“Initialize persistent session”).
 
-It might be interesting to show your `gotestdox` output to users, customers, or business folks, and see if it makes sense to them. If so, you're on the right lines. And it's quite likely to generate some interesting conversations ("Is that really what it does? But that's not what we asked for!")
+It might be interesting to show your `gotestdox` output to users, customers, or business folks, and see if it makes sense to them. If so, you're on the right lines. And it's quite likely to generate some interesting conversations (“Is that really what it does? But that's not what we asked for!”)
 
 ## Subtest names should complete a sentence
 
