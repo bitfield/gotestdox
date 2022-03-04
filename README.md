@@ -128,7 +128,7 @@ If you want to run `go test -json` yourself, for example as part of a shell pipe
 
 **`go test -json | gotestdox`**
 
-If `gotestdox` detects that its input is not attached to a terminal, it will wait for you to pipe JSON data into it. Otherwise, it will run the tests for you and process the output.
+In this case, any flags or arguments to `gotestdox` will be ignored, and it won't run the tests; it will act purely as a text filter.
 
 # So what?
 
