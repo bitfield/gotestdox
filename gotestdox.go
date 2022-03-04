@@ -144,7 +144,7 @@ type Event struct {
 }
 
 func (e Event) String() string {
-	status := "✘"
+	status := "x"
 	if e.Action == "pass" {
 		status = "✔"
 	}

@@ -203,14 +203,14 @@ func TestEventString_FormatsPassEventsWithATick(t *testing.T) {
 	}
 }
 
-func TestEventString_FormatsFailEventsWithACross(t *testing.T) {
+func TestEventString_FormatsFailEventsWithAnX(t *testing.T) {
 	t.Parallel()
 	input := gotestdox.Event{
 		Action:  "fail",
 		Test:    "TestFooDoesX",
 		Elapsed: 0.01,
 	}
-	want := " ✘ Foo does x (0.01s)"
+	want := " x Foo does x (0.01s)"
 	got := input.String()
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
