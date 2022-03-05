@@ -12,7 +12,7 @@ func main() {
 	if isatty.IsTerminal(os.Stdin.Fd()) {
 		allOK = gotestdox.ExecGoTest()
 	} else {
-		allOK = gotestdox.Filter(os.Stdin)
+		allOK = gotestdox.Filter(os.Stdin, os.Stdout)
 	}
 	if !allOK {
 		os.Exit(1)

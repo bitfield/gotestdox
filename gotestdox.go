@@ -27,14 +27,14 @@ func ExecGoTest() bool {
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-	allOK := Filter(input)
+	allOK := Filter(input, os.Stdout)
 	if err := cmd.Wait(); err != nil {
 		allOK = false
 	}
 	return allOK
 }
 
-func Filter(input io.ReadCloser) bool {
+func Filter(input io.Reader, output io.Writer) bool {
 	allOK := true
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
@@ -46,7 +46,7 @@ func Filter(input io.ReadCloser) bool {
 			allOK = false
 		}
 		if event.Relevant() {
-			fmt.Println(event)
+			fmt.Fprintln(output, event)
 		}
 	}
 	return allOK

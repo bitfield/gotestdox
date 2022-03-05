@@ -1,6 +1,8 @@
 package gotestdox_test
 
 import (
+	"io"
+	"os"
 	"testing"
 
 	"github.com/bitfield/gotestdox"
@@ -253,5 +255,31 @@ func TestRelevantIsFalseForNonPassFailEvents(t *testing.T) {
 		if relevant {
 			t.Errorf("true for irrelevant event %q on %q", event.Action, event.Test)
 		}
+	}
+}
+
+func TestFilterReturnsOKIfThereAreNoTestFailures(t *testing.T) {
+	t.Parallel()
+	f, err := os.Open("testdata/passing_tests.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	allOK := gotestdox.Filter(f, io.Discard)
+	if !allOK {
+		t.Error("not OK")
+	}
+}
+
+func TestFilterReturnsNotOKIfAnyTestFails(t *testing.T) {
+	t.Parallel()
+	f, err := os.Open("testdata/failing_tests.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	allOK := gotestdox.Filter(f, io.Discard)
+	if allOK {
+		t.Error("got OK")
 	}
 }
