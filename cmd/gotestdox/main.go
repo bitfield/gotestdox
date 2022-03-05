@@ -8,9 +8,13 @@ import (
 )
 
 func main() {
+	allOK := true
 	if isatty.IsTerminal(os.Stdin.Fd()) {
-		gotestdox.ExecGoTest()
+		allOK = gotestdox.ExecGoTest()
 	} else {
-		gotestdox.Filter(os.Stdin)
+		allOK = gotestdox.Filter(os.Stdin)
+	}
+	if !allOK {
+		os.Exit(1)
 	}
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func ExecGoTest() {
+func ExecGoTest() bool {
 	args := []string{"test", "-json"}
 	args = append(args, os.Args[1:]...)
 	cmd := exec.Command("go", args...)
@@ -23,26 +23,33 @@ func ExecGoTest() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-	Filter(input)
+	allOK := Filter(input)
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err)
+		allOK = false
 	}
+	return allOK
 }
 
-func Filter(input io.ReadCloser) {
+func Filter(input io.ReadCloser) bool {
+	allOK := true
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
 		if err != nil {
 			continue
 		}
+		if event.Action == "fail" {
+			allOK = false
+		}
 		if event.Relevant() {
 			fmt.Println(event)
 		}
 	}
+	return allOK
 }
 
 // Based on https://github.com/fatih/camelcase, used under MIT licence
