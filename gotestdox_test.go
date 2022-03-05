@@ -189,31 +189,18 @@ func TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine(t *testing.T) {
 	}
 }
 
-func TestEventString_FormatsPassEventsWithATick(t *testing.T) {
+func TestEventString_FormatsPassAndFailEventsDifferently(t *testing.T) {
 	t.Parallel()
-	input := gotestdox.Event{
-		Action:  "pass",
-		Test:    "TestFooDoesX",
-		Elapsed: 0.01,
-	}
-	want := " ✔ Foo does x (0.01s)"
-	got := input.String()
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func TestEventString_FormatsFailEventsWithAnX(t *testing.T) {
-	t.Parallel()
-	input := gotestdox.Event{
-		Action:  "fail",
-		Test:    "TestFooDoesX",
-		Elapsed: 0.01,
-	}
-	want := " x Foo does x (0.01s)"
-	got := input.String()
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
+	pass := gotestdox.Event{
+		Action: "pass",
+		Test:   "TestFooDoesX",
+	}.String()
+	fail := gotestdox.Event{
+		Action: "fail",
+		Test:   "TestFooDoesX",
+	}.String()
+	if pass == fail {
+		t.Errorf("both pass and fail events formatted as %q", pass)
 	}
 }
 
@@ -237,7 +224,7 @@ func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 	}
 }
 
-func TestRelevantIsFalseForOtherEvents(t *testing.T) {
+func TestRelevantIsFalseForNonPassFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
 		{

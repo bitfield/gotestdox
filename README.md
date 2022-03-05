@@ -13,7 +13,7 @@ go install github.com/bitfield/gotestdox/cmd/gotestdox@latest
 
 ```
 TestRelevantIsTrueForTestPassOrFailEvents
-TestRelevantIsFalseForOtherEvents
+TestRelevantIsFalseForNonPassFailEvents
 ```
 
 We can transform them into straightforward sentences that express the desired behaviour, by running `gotestdox`:
@@ -24,7 +24,7 @@ This will run the tests, and print:
 
 ```
  ✔ Relevant is true for test pass or fail events (0.00s)
- ✔ Relevant is false for other events (0.00s)
+ ✔ Relevant is false for non pass fail events (0.00s)
 ```
 
 # Why
@@ -179,7 +179,7 @@ In fact, let's lean into this and call them “test sentences” instead of “t
 When we see this test sentence, it's helpful, but it also immediately prompts us to think, “well, what about *non*-matching input?” Okay. That's another test, then:
 
 ```
-TestMatchIsFalseForNonMatchingInput
+Match is false for non matching input
 ```
 
 We haven't just improved the names of our existing tests; we've actually generated new test cases. That's powerful. When we're forced to describe some particular case explicitly, it becomes obvious what *other* possibilities exist that we haven't yet tested.
@@ -263,8 +263,7 @@ When you've used `gotestdox` a little, it starts to feel perfectly natural to wr
 Here is the complete `gotestdox` rendering of its own tests (sorted for readability), in case it gives you any useful ideas:
 
 ```
- ✔ EventString formats fail events with a cross (0.00s)
- ✔ EventString formats pass events with a tick (0.00s)
+ ✔ EventString formats pass and fail events differently (0.00s)
  ✔ ExtractFuncName (0.00s)
  ✔ ExtractFuncName correctly extracts func name from a subtest (0.00s)
  ✔ ExtractFuncName doesn't break if the test is named just test (0.00s)
@@ -275,7 +274,7 @@ Here is the complete `gotestdox` rendering of its own tests (sorted for readabil
  ✔ ExtractFuncName treats multiple underscores as word breaks (0.00s)
  ✔ ExtractFuncName without an underscore before a slash treats camel case as word breaks (0.00s)
  ✔ ParseJSON correctly parses a single go test JSON output line (0.00s)
- ✔ Relevant is false for other events (0.00s)
+ ✔ Relevant is false for non pass fail events (0.00s)
  ✔ Relevant is true for test pass or fail events (0.00s)
  ✔ Sentence (0.00s)
  ✔ Sentence correctly renders a well-formed test name (0.00s)

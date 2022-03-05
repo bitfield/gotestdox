@@ -11,6 +11,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/fatih/color"
 )
 
 func ExecGoTest() {
@@ -144,9 +146,9 @@ type Event struct {
 }
 
 func (e Event) String() string {
-	status := "x"
+	status := color.RedString("x")
 	if e.Action == "pass" {
-		status = "✔"
+		status = color.GreenString("✔")
 	}
 	return fmt.Sprintf(" %s %s (%.2fs)", status, Sentence(e.Test), e.Elapsed)
 }
