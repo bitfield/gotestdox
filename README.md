@@ -29,7 +29,7 @@ This will run the tests, and print:
 
 # Why
 
-I got the idea from a blog post by Dan North, which says:
+I read a blog post by Dan North, which says:
 
 > My first “Aha!” moment occurred as I was being shown a deceptively simple utility called `agiledox`, written by my colleague, Chris Stevenson. It takes a JUnit test class and prints out the method names as plain sentences.
 >
@@ -108,6 +108,16 @@ In other words, `gotestdox` is not the thing. It's the thing that gets us to the
 
 Some more advanced ways to use `gotestdox`:
 
+## Exit status
+
+If there are any test failures, `gotestdox` will report exit status 1.
+
+## Colour
+
+`gotestdox` indicates a passing test with a “✔” emoji, and a failing test with an “x”. These are displayed as green and red respectively, using the [`color`](https://github.com/fatih/color) library, which automagically detects if it's talking to a colour-capable terminal.
+
+If not (for example, when you redirect output to a file), or if the [`NO_COLOR`](https://no-color.org/) environment variable is set to any value, colour output will be disabled.
+
 ## Test flags and arguments
 
 `gotestdox`, with no arguments, will run the command `go test -json` and process its output.
@@ -122,13 +132,30 @@ will run the command:
 
 You can supply a list of packages to test, or any other arguments or flags understood by `go test`. However, `gotestdox` only prints events about *tests* (ignoring benchmarks and examples).
 
+## Multiple packages
+
+To test all the packages in the current tree, run:
+
+**`gotestdox ./...`**
+
+Each package's test results will be prefixed by the fully-qualified name of the package. For example:
+
+```
+github.com/octocat/mymodule/api:
+ ✔ NewServer returns a correctly configured server (0.00s)
+ ✔ NewServer errors on invalid config options (0.00s)
+
+github.com/octocat/mymodule/util:
+ ✔ LeftPad adds the correct number of leading spaces (0.00s)
+ ```
+
 ## Filtering standard input
 
 If you want to run `go test -json` yourself, for example as part of a shell pipeline, and pipe its output into `gotestdox`, you can do that too:
 
 **`go test -json | gotestdox`**
 
-In this case, any flags or arguments to `gotestdox` will be ignored, and it won't run the tests; it will act purely as a text filter.
+In this case, any flags or arguments to `gotestdox` will be ignored, and it won't run the tests; it will act purely as a text filter. However, just like when it runs the tests itself, it will report exit status 1 if there are any test failures.
 
 # So what?
 
@@ -263,6 +290,7 @@ When you've used `gotestdox` a little, it starts to feel perfectly natural to wr
 Here is the complete `gotestdox` rendering of its own tests (sorted for readability), in case it gives you any useful ideas:
 
 ```
+github.com/bitfield/gotestdox:
  ✔ EventString formats pass and fail events differently (0.00s)
  ✔ ExtractFuncName (0.00s)
  ✔ ExtractFuncName correctly extracts func name from a subtest (0.00s)
@@ -273,6 +301,8 @@ Here is the complete `gotestdox` rendering of its own tests (sorted for readabil
  ✔ ExtractFuncName treats a single underscore before the first slash as marking the end of a multi-word function name (0.00s)
  ✔ ExtractFuncName treats multiple underscores as word breaks (0.00s)
  ✔ ExtractFuncName without an underscore before a slash treats camel case as word breaks (0.00s)
+ ✔ Filter returns not OK if any test fails (0.00s)
+ ✔ Filter returns OK if there are no test failures (0.00s)
  ✔ ParseJSON correctly parses a single go test JSON output line (0.00s)
  ✔ Relevant is false for non pass fail events (0.00s)
  ✔ Relevant is true for test pass or fail events (0.00s)

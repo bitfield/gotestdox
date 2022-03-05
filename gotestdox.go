@@ -36,6 +36,7 @@ func ExecGoTest() bool {
 
 func Filter(input io.Reader, output io.Writer) bool {
 	allOK := true
+	var curPkg string
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
@@ -45,9 +46,17 @@ func Filter(input io.Reader, output io.Writer) bool {
 		if event.Action == "fail" {
 			allOK = false
 		}
-		if event.Relevant() {
-			fmt.Fprintln(output, event)
+		if !event.Relevant() {
+			continue
 		}
+		if event.Package != curPkg {
+			if curPkg != "" {
+				fmt.Fprintln(output)
+			}
+			fmt.Fprintf(output, "%s:\n", event.Package)
+			curPkg = event.Package
+		}
+		fmt.Fprintln(output, event)
 	}
 	return allOK
 }
