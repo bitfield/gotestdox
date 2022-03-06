@@ -118,9 +118,14 @@ func TestPrettify(t *testing.T) {
 			want:  "Foo does what's required",
 		},
 		{
-			name:  "preserves the final digit in words that end with a digit",
+			name:  "does not erase the final digit in words that end with a digit",
 			input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
 			want:  "Extract files truncated bzip 2 which will return an error",
+		},
+		{
+			name:  "keeps a trailing digit as part of an initialism",
+			input: "TestExtractFiles/Truncated_BZIP2_which_will_return_an_error",
+			want:  "Extract files truncated BZIP2 which will return an error",
 		},
 		{
 			name:  "recognises a dash followed by a digit as a negative number",
