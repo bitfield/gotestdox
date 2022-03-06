@@ -1,5 +1,4 @@
-[![Go Reference](https://pkg.go.dev/badge/github.com/bitfield/gotestdox.svg)](https://pkg.go.dev/github.com/bitfield/gotestdox)[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Go Report Card](https://goreportcard.com/badge/github.com/bitfield/gotestdox)](https://goreportcard.com/report/github.com/bitfield/gotestdox)[![CircleCI](https://circleci.com/gh/bitfield/gotestdox.svg?style=svg)](https://circleci.com/gh/bitfield/gotestdox)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bitfield/gotestdox.svg)](https://pkg.go.dev/github.com/bitfield/gotestdox)[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)[![Go Report Card](https://goreportcard.com/badge/github.com/bitfield/gotestdox)](https://goreportcard.com/report/github.com/bitfield/gotestdox)[![CircleCI](https://circleci.com/gh/bitfield/gotestdox.svg?style=svg)](https://circleci.com/gh/bitfield/gotestdox)
 
 ```
 go install github.com/bitfield/gotestdox/cmd/gotestdox@latest
