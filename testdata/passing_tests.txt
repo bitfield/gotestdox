@@ -149,7 +149,7 @@
 {"Time":"2022-03-05T11:33:08.169713Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestSentence/retains_apostrophised_words_in_their_original_form","Elapsed":0}
 {"Time":"2022-03-05T11:33:08.169728Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestSentence","Elapsed":0}
 {"Time":"2022-03-05T11:33:08.169742Z","Action":"output","Package":"github.com/bitfield/gotestdox","Test":"TestFilterReturnsNotOKIfAnyTestFails","Output":"--- PASS: TestFilterReturnsNotOKIfAnyTestFails (0.00s)\n"}
-{"Time":"2022-03-05T11:33:08.169757Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestFilterReturnsNotOKIfAnyTestFails","Elapsed":0}
-{"Time":"2022-03-05T11:33:08.169771Z","Action":"output","Package":"github.com/bitfield/gotestdox","Output":"PASS\n"}
+{"Time":"2022-03-05T11:33:08.169757Z","Action":"pass","Package":"github.com/bitfield/gotestdox2","Test":"TestFilterReturnsNotOKIfAnyTestFails","Elapsed":0}
+{"Time":"2022-03-05T11:33:08.169771Z","Action":"output","Package":"github.com/bitfield/gotestdox2","Output":"PASS\n"}
 {"Time":"2022-03-05T11:33:08.170022Z","Action":"output","Package":"github.com/bitfield/gotestdox","Output":"ok  \tgithub.com/bitfield/gotestdox\t0.155s\n"}
 {"Time":"2022-03-05T11:33:08.170099Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Elapsed":0.155}

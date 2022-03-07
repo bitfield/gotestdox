@@ -8,13 +8,13 @@ import (
 )
 
 func main() {
-	allOK := true
+	td := gotestdox.NewTestDoxer()
 	if isatty.IsTerminal(os.Stdin.Fd()) {
-		allOK = gotestdox.ExecGoTest()
+		td.ExecGoTest(os.Args[1:])
 	} else {
-		allOK = gotestdox.Filter(os.Stdin, os.Stdout)
+		td.Filter()
 	}
-	if !allOK {
+	if !td.OK {
 		os.Exit(1)
 	}
 }

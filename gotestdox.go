@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,50 +12,69 @@ import (
 	"github.com/fatih/color"
 )
 
-func ExecGoTest() bool {
-	args := []string{"test", "-json"}
-	args = append(args, os.Args[1:]...)
-	cmd := exec.Command("go", args...)
-	input, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmd.Stderr = os.Stderr
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
-	allOK := Filter(input, os.Stdout)
-	if err := cmd.Wait(); err != nil {
-		allOK = false
-	}
-	return allOK
+type TestDoxer struct {
+	Stdin          io.Reader
+	Stdout, Stderr io.Writer
+	OK             bool
 }
 
-func Filter(input io.Reader, output io.Writer) bool {
-	allOK := true
+func NewTestDoxer() *TestDoxer {
+	return &TestDoxer{
+		Stdin:  os.Stdin,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
+}
+
+func (td *TestDoxer) ExecGoTest(userArgs []string) {
+	args := []string{"test", "-json"}
+	args = append(args, userArgs...)
+	cmd := exec.Command("go", args...)
+	goTestOutput, err := cmd.StdoutPipe()
+	if err != nil {
+		fmt.Fprintln(td.Stderr, cmd.Args, err)
+		return
+	}
+	cmd.Stderr = td.Stderr
+	if err := cmd.Start(); err != nil {
+		fmt.Fprintln(td.Stderr, cmd.Args, err)
+		return
+	}
+	td.Stdin = goTestOutput
+	td.Filter()
+	if err := cmd.Wait(); err != nil {
+		td.OK = false
+		fmt.Fprintln(td.Stderr, cmd.Args, err)
+		return
+	}
+}
+
+func (td *TestDoxer) Filter() {
+	td.OK = true
 	var curPkg string
-	scanner := bufio.NewScanner(input)
+	scanner := bufio.NewScanner(td.Stdin)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
 		if err != nil {
-			continue
+			td.OK = false
+			fmt.Fprintln(td.Stderr, err)
+			return
 		}
 		if event.Action == "fail" {
-			allOK = false
+			td.OK = false
 		}
 		if !event.Relevant() {
 			continue
 		}
 		if event.Package != curPkg {
 			if curPkg != "" {
-				fmt.Fprintln(output)
+				fmt.Fprintln(td.Stdout, curPkg)
 			}
-			fmt.Fprintf(output, "%s:\n", event.Package)
+			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
 			curPkg = event.Package
 		}
-		fmt.Fprintln(output, event)
+		fmt.Fprintln(td.Stdout, event)
 	}
-	return allOK
 }
 
 // https://cs.opensource.google/go/go/+/refs/tags/go1.17.7:src/cmd/internal/test2json/test2json.go;l=30

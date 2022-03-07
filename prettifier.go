@@ -8,6 +8,23 @@ import (
 	"unicode"
 )
 
+func Prettify(tname string) string {
+	tname = strings.TrimPrefix(tname, "Test")
+	p := &prettifier{
+		words: []string{},
+	}
+	if os.Getenv("GOTESTDOX_DEBUG") != "" {
+		p.debug = os.Stderr
+	}
+	state := start
+	for _, r := range tname {
+		state = state(p, r)
+	}
+	p.emitWord()
+	p.log(fmt.Sprintf("%#v\n", p.words))
+	return strings.Join(p.words, " ")
+}
+
 type prettifier struct {
 	debug          io.Writer
 	curWord        string
@@ -180,25 +197,4 @@ func inNumber(p *prettifier, r rune) stateFunc {
 		p.emitRune(r)
 		return betweenWords
 	}
-}
-
-func NewPrettifier() *prettifier {
-	return &prettifier{
-		words: []string{},
-	}
-}
-
-func Prettify(tname string) string {
-	tname = strings.TrimPrefix(tname, "Test")
-	p := NewPrettifier()
-	if os.Getenv("GOTESTDOX_DEBUG") != "" {
-		p.debug = os.Stderr
-	}
-	state := start
-	for _, r := range tname {
-		state = state(p, r)
-	}
-	p.emitWord()
-	p.log(fmt.Sprintf("%#v\n", p.words))
-	return strings.Join(p.words, " ")
 }
