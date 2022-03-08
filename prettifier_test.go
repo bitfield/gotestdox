@@ -1,6 +1,7 @@
 package gotestdox_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/bitfield/gotestdox"
@@ -156,4 +157,18 @@ func TestPrettify(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExamplePrettify() {
+	input := "TestFoo/has_well-formed_output"
+	fmt.Println(gotestdox.Prettify(input))
+	// Output:
+	// Foo has well-formed output
+}
+
+func ExamplePrettify_underscoreHint() {
+	input := "TestHandleInput_ClosesInputAfterReading"
+	fmt.Println(gotestdox.Prettify(input))
+	// Output:
+	// HandleInput closes input after reading
 }

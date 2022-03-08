@@ -132,6 +132,10 @@ If you want to run `go test -json` yourself, for example as part of a shell pipe
 
 In this case, any flags or arguments to `gotestdox` will be ignored, and it won't run the tests; it will act purely as a text filter. However, just like when it runs the tests itself, it will report exit status 1 if there are any test failures.
 
+## As a library
+
+See [pkg.go.dev/github.com/bitfield/gotestdox](https://pkg.go.dev/github.com/bitfield/gotestdox) for the full documentation on using `gotestdox` as a library package.
+
 # So what?
 
 Why should you care, then? What's interesting about `gotestdox`, or any `testdox`-like tool, I find, is the way its output makes you think about your tests, how you name them, and what they do.

@@ -12,12 +12,16 @@ import (
 	"github.com/fatih/color"
 )
 
+// TestDoxer holds the state and config associated with a particular invocation
+// of 'go test'.
 type TestDoxer struct {
 	Stdin          io.Reader
 	Stdout, Stderr io.Writer
 	OK             bool
 }
 
+// NewTestDoxer returns a *TestDoxer configured with the default I/O streams:
+// stdin, stdout, stderr.
 func NewTestDoxer() *TestDoxer {
 	return &TestDoxer{
 		Stdin:  os.Stdin,
@@ -26,6 +30,11 @@ func NewTestDoxer() *TestDoxer {
 	}
 }
 
+// ExecGoTest runs the 'go test -json' command, with any extra args supplied by
+// the user, and consumes its output. Any errors are reported to the TestDoxer's
+// configured Stderr stream, including the full command line that was run. If
+// all tests passed, the TestDoxer's OK field will be true. If there was a test
+// failure, or 'go test' returned some error, OK will be false.
 func (td *TestDoxer) ExecGoTest(userArgs []string) {
 	args := []string{"test", "-json"}
 	args = append(args, userArgs...)
@@ -49,6 +58,13 @@ func (td *TestDoxer) ExecGoTest(userArgs []string) {
 	}
 }
 
+// Filter reads from the TestDoxer's Stdin stream, line by line, processing JSON
+// records emitted by 'go test -json'. For each Go package it sees records
+// about, it will print the full name of the package to Stdout, followed by a
+// line giving the pass/fail status and the prettified name of each test. If all
+// tests passed, the TestDoxer's OK field will be true at the end. If not, or if
+// there was a parsing error, it will be false. Errors will be reported to
+// Stderr.
 func (td *TestDoxer) Filter() {
 	td.OK = true
 	var curPkg string
@@ -77,6 +93,11 @@ func (td *TestDoxer) Filter() {
 	}
 }
 
+// Event represents a Go test event as recorded by the 'go test -json' command.
+// It does not attempt to unmarshal all the data, only those fields it needs to
+// know about. The struct definition is based on that used by Go to create the
+// JSON in the first place:
+//
 // https://cs.opensource.google/go/go/+/refs/tags/go1.17.7:src/cmd/internal/test2json/test2json.go;l=30
 type Event struct {
 	Action  string
@@ -84,6 +105,16 @@ type Event struct {
 	Test    string
 	Elapsed float64
 }
+
+// String formats a test Event for display. If the test passed, it will be
+// prefixed by a check mark emoji, or an 'x' if it failed. If os.Stdin is a
+// terminal (as determined by the 'isatty' library), and the 'NO_COLOR'
+// environment variable is not set, check marks will be shown in green and x's
+// in red.
+//
+// The name of the test will be filtered through Prettify to turn it into a
+// sentence, and finally the elapsed time will be shown in parentheses, to 2
+// decimal places.
 
 func (e Event) String() string {
 	status := color.RedString("x")
@@ -93,6 +124,8 @@ func (e Event) String() string {
 	return fmt.Sprintf(" %s %s (%.2fs)", status, Prettify(e.Test), e.Elapsed)
 }
 
+// Relevant determines whether or not the test event is one that we are
+// interested in (namely, a pass or fail event).
 func (e Event) Relevant() bool {
 	// Events on non-tests are irrelevant
 	if !strings.HasPrefix(e.Test, "Test") {
@@ -104,11 +137,14 @@ func (e Event) Relevant() bool {
 	return false
 }
 
+// ParseJSON takes a string representing a single JSON test record as emitted by
+// 'go test -json', and attempts to parse it into an Event struct, returning any
+// parsing error encountered.
 func ParseJSON(line string) (Event, error) {
 	event := Event{}
 	err := json.Unmarshal([]byte(line), &event)
 	if err != nil {
-		return Event{}, err
+		return Event{}, fmt.Errorf("parsing JSON: %w\ninput: %s", err, line)
 	}
 	return event, nil
 }

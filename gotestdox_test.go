@@ -1,12 +1,15 @@
 package gotestdox_test
 
 import (
+	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/bitfield/gotestdox"
+	"github.com/fatih/color"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -170,7 +173,7 @@ func TestFilterReturnsNotOKOnParsingError(t *testing.T) {
 
 func TestExecGoTest_ReturnsOKWhenTestsPass(t *testing.T) {
 	t.Parallel()
-	path := newTempTestDir(t, passingTest)
+	path := newTempTestPath(t, passingTest)
 	td := gotestdox.TestDoxer{
 		Stdin:  strings.NewReader("invalid"),
 		Stdout: io.Discard,
@@ -184,7 +187,7 @@ func TestExecGoTest_ReturnsOKWhenTestsPass(t *testing.T) {
 
 func TestExecGoTest_ReturnsNotOKWhenTestsFail(t *testing.T) {
 	t.Parallel()
-	path := newTempTestDir(t, failingTest)
+	path := newTempTestPath(t, failingTest)
 	td := gotestdox.TestDoxer{
 		Stdin:  strings.NewReader("invalid"),
 		Stdout: io.Discard,
@@ -214,7 +217,7 @@ var (
 	failingTest = preamble + "{t.FailNow()}"
 )
 
-func newTempTestDir(t *testing.T, data string) (path string) {
+func newTempTestPath(t *testing.T, data string) (path string) {
 	t.Helper()
 	testDir := t.TempDir()
 	err := os.WriteFile(testDir+"/go.mod", []byte("module dummy"), os.ModePerm)
@@ -227,4 +230,56 @@ func newTempTestDir(t *testing.T, data string) (path string) {
 		t.Fatal(err)
 	}
 	return path
+}
+
+func ExampleTestDoxer_Filter() {
+	td := gotestdox.NewTestDoxer()
+	td.Stdin = strings.NewReader(`{"Time":"2022-03-05T11:33:08.167467Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestRelevantIsTrueForTestPassOrFailEvents","Elapsed":0}`)
+	color.NoColor = true
+	td.Filter()
+	// Output:
+	// github.com/bitfield/gotestdox:
+	//  ✔ Relevant is true for test pass or fail events (0.00s)
+}
+
+func ExampleEvent_String() {
+	event := gotestdox.Event{
+		Action: "pass",
+		Test:   "TestEventString_FormatsPassAndFailEventsDifferently",
+	}
+	color.NoColor = true
+	fmt.Println(event.String())
+	// Output:
+	// ✔ EventString formats pass and fail events differently (0.00s)
+}
+
+func ExampleEvent_Relevant_true() {
+	event := gotestdox.Event{
+		Action: "pass",
+		Test:   "TestFoo",
+	}
+	fmt.Println(event.Relevant())
+	// Output:
+	// true
+}
+
+func ExampleEvent_Relevant_false() {
+	event := gotestdox.Event{
+		Action: "fail",
+		Test:   "ExampleFoo",
+	}
+	fmt.Println(event.Relevant())
+	// Output:
+	// false
+}
+
+func ExampleParseJSON() {
+	input := `{"Time":"2022-03-05T11:33:08.167467Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestRelevantIsTrueForTestPassOrFailEvents","Elapsed":0}`
+	event, err := gotestdox.ParseJSON(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%#v\n", event)
+	// Output:
+	// gotestdox.Event{Action:"pass", Package:"github.com/bitfield/gotestdox", Test:"TestRelevantIsTrueForTestPassOrFailEvents", Elapsed:0}
 }

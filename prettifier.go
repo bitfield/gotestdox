@@ -8,6 +8,39 @@ import (
 	"unicode"
 )
 
+// Prettify takes a string representing the name of a Go test, and attempts to
+// turn it into a readable sentence, by replacing camel-case transitions and
+// underscores with spaces.
+//
+// The input is expected to be a valid Go test name, as encoded by 'go test
+// -json'. For example, it might be something like this:
+//
+// TestFoo/has_well-formed_output
+//
+// Here, the parent test is 'TestFoo', and this data is about a subtest whose
+// name is 'has well-formed output'. Go replaces spaces in subtest names with
+// underscores, and unprintable characters with the equivalent Go literal:
+// https://cs.opensource.google/go/go/+/refs/tags/go1.17.8:src/testing/match.go;l=133;drc=refs%2Ftags%2Fgo1.17.8
+//
+// Prettify does its best to undo this, yielding (something close to) the
+// original subtest name. For example:
+//
+// Foo has well-formed output
+//
+// Because Go function names are often in camel-case, there's an ambiguity in
+// parsing a test name like this:
+//
+// TestHandleInputClosesInputAfterReading
+//
+// We can see that this is about a function named 'HandleInput', but Prettify
+// has no way of knowing that. To give it a hint, we can put an underscore after
+// the name of the function. This will be interpreted as marking the end of a
+// multiword function name:
+//
+// TestHandleInput_ClosesInputAfterReading
+//
+// If the GOTESTDOX_DEBUG environment variable is set, Prettify will output
+// (copious) debug information to os.Stderr.
 func Prettify(tname string) string {
 	tname = strings.TrimPrefix(tname, "Test")
 	p := &prettifier{
@@ -25,6 +58,8 @@ func Prettify(tname string) string {
 	return strings.Join(p.words, " ")
 }
 
+// This lexer implementation owes a lot, if not everything, to Rob Pike's talk
+// on 'Lexical Scanning in Go': https://www.youtube.com/watch?v=HxaD_trXwRE
 type prettifier struct {
 	debug          io.Writer
 	curWord        string
