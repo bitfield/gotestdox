@@ -115,7 +115,6 @@ type Event struct {
 // The name of the test will be filtered through Prettify to turn it into a
 // sentence, and finally the elapsed time will be shown in parentheses, to 2
 // decimal places.
-
 func (e Event) String() string {
 	status := color.RedString("x")
 	if e.Action == "pass" {
@@ -125,7 +124,9 @@ func (e Event) String() string {
 }
 
 // Relevant determines whether or not the test event is one that we are
-// interested in (namely, a pass or fail event).
+// interested in (namely, a pass or fail event on a test). Events on non-tests
+// are ignored, and all events on tests other than pass or fail events are also
+// ignored.
 func (e Event) Relevant() bool {
 	// Events on non-tests are irrelevant
 	if !strings.HasPrefix(e.Test, "Test") {
