@@ -8,6 +8,7 @@ jobs:
       - image: cimg/go:1.18
     steps:
       - checkout
+      - run: go version
       - run: go test ./...
   test-windows:
     executor:
@@ -16,7 +17,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: build
-      - run: go test
+      - run: go version
+      - run: go test ./...
 
 workflows:
   version: 2
