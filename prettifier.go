@@ -120,8 +120,14 @@ func betweenWords(p *prettifier, r rune) stateFunc {
 	case unicode.IsLower(r):
 		p.emitRune(r)
 		return inWordLower
+	case unicode.IsDigit(r):
+		p.emitRune(r)
+		return inNumber
 	case r == '_':
 		p.seenUnderscore = true
+		return betweenWords
+	case r == '/':
+		p.inSubTest = true
 		return betweenWords
 	default:
 		p.emitRune(r)
@@ -245,6 +251,10 @@ func inNumber(p *prettifier, r rune) stateFunc {
 		p.emitRune(r)
 		return inWordUpper
 	case r == '_':
+		p.emitWord()
+		return betweenWords
+	case r == '/':
+		p.inSubTest = true
 		p.emitWord()
 		return betweenWords
 	default:
