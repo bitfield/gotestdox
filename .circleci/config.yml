@@ -5,7 +5,7 @@ orbs:
 jobs:
   test:
     docker:
-      - image: cimg/go:1.18
+      - image: cimg/go:1.17
     steps:
       - checkout
       - run: go version

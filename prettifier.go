@@ -103,6 +103,9 @@ func start(p *prettifier, r rune) stateFunc {
 	case unicode.IsUpper(r):
 		p.emitRune(r)
 		return inWordUpper
+	case r == '/':
+		p.inSubTest = true
+		return betweenWords
 	default:
 		return start
 	}
@@ -117,6 +120,9 @@ func betweenWords(p *prettifier, r rune) stateFunc {
 	case unicode.IsLower(r):
 		p.emitRune(r)
 		return inWordLower
+	case unicode.IsDigit(r):
+		p.emitRune(r)
+		return inNumber
 	case r == '_':
 		p.seenUnderscore = true
 		return betweenWords
@@ -179,7 +185,7 @@ func inInitialism(p *prettifier, r rune) stateFunc {
 func inWordUpper(p *prettifier, r rune) stateFunc {
 	p.log("inWordUpper", p.curWord, string(r))
 	switch {
-	case unicode.IsUpper(r):
+	case unicode.IsUpper(r), unicode.IsDigit(r):
 		p.emitRune(r)
 		return inInitialism
 	case r == '_':
@@ -212,7 +218,7 @@ func inWordLower(p *prettifier, r rune) stateFunc {
 		p.emitRune(r)
 		return inWordUpper
 	case unicode.IsDigit(r):
-		if !strings.HasSuffix(p.curWord, "-") {
+		if !strings.HasSuffix(p.curWord, "-") && !strings.HasSuffix(p.curWord, "=") {
 			p.emitWord()
 		}
 		p.emitRune(r)

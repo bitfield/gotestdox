@@ -73,7 +73,7 @@ will run the command:
 
 `go test -json -run ParseJSON`
 
-You can supply a list of packages to test, or any other arguments or flags understood by `go test`. However, `gotestdox` only prints events about *tests* (ignoring benchmarks and examples).
+You can supply a list of packages to test, or any other arguments or flags understood by `go test`. However, `gotestdox` only prints events about *tests* (ignoring benchmarks and examples). It doesn't report fuzz tests, since they don't tend to have useful names.
 
 ## Multiple packages
 
@@ -271,32 +271,37 @@ Here is the complete `gotestdox` rendering of its own tests (sorted for readabil
 ```
 github.com/bitfield/gotestdox:
  ✔ EventString formats pass and fail events differently (0.00s)
- ✔ ExecGoTest returns not OK when command errors (0.02s)
- ✔ ExecGoTest returns not OK when tests fail (0.79s)
- ✔ ExecGoTest returns OK when tests pass (0.66s)
- ✔ Filter returns not OK on parsing error (0.00s)
+ ✔ ExecGoTest sets OK to false when command errors (0.03s)
+ ✔ ExecGoTest sets OK to false when tests fail (0.76s)
+ ✔ ExecGoTest sets OK to true when tests pass (0.90s)
  ✔ Filter sets OK to false if any test fails (0.01s)
- ✔ Filter sets OK to true if there are no test failures (0.01s)
+ ✔ Filter sets OK to false on parsing error (0.00s)
+ ✔ Filter sets OK to true if there are no test failures (0.00s)
  ✔ NewTestDoxer returns testdoxer with standard IO streams (0.00s)
  ✔ ParseJSON errors on invalid JSON (0.00s)
  ✔ ParseJSON returns valid data for valid JSON (0.00s)
  ✔ Prettify (0.00s)
  ✔ Prettify correctly renders a well-formed test name (0.00s)
+ ✔ Prettify does not break words when a digit follows an = sign (0.00s)
  ✔ Prettify does not erase the final digit in words that end with a digit (0.00s)
  ✔ Prettify does not treat an underscore in a subtest name as marking the end of a multiword function name (0.00s)
  ✔ Prettify doesn't incorrectly title-case single-letter words (0.00s)
  ✔ Prettify eliminates any words containing underscores after splitting (0.00s)
+ ✔ Prettify handles a test with no name, but with subtests (0.00s)
  ✔ Prettify handles multiple underscores, with the first marking the end of a multiword function name (0.00s)
  ✔ Prettify inserts a word break before subtest names beginning with a lowercase letter (0.00s)
  ✔ Prettify is okay with test names not in the form of a sentence (0.00s)
  ✔ Prettify keeps a trailing digit as part of an initialism (0.00s)
  ✔ Prettify keeps numbers within a hyphenated word (0.00s)
+ ✔ Prettify keeps together digits in numbers that are standalone words (0.00s)
  ✔ Prettify keeps together hyphenated words with initial capitals (0.00s)
  ✔ Prettify keeps together hyphenated words with initialisms (0.00s)
  ✔ Prettify knows that just test is a valid test name (0.00s)
  ✔ Prettify preserves capitalisation of initialism when it is the first word (0.00s)
  ✔ Prettify preserves capitalisation of initialisms such as PDF (0.00s)
  ✔ Prettify preserves capitalisation of two-letter initialisms such as OK (0.00s)
+ ✔ Prettify preserves initialisms containing digits (0.00s)
+ ✔ Prettify preserves initialisms containing digits with two or more leading alpha characters (0.00s)
  ✔ Prettify preserves longer all-caps words (0.00s)
  ✔ Prettify recognises a dash followed by a digit as a negative number (0.00s)
  ✔ Prettify renders subtest names without the slash, and with underscores replaced by spaces (0.00s)
@@ -308,7 +313,7 @@ github.com/bitfield/gotestdox:
  ✔ Prettify treats consecutive underscores as a single word break (0.00s)
  ✔ Prettify treats numbers as word separators (0.00s)
  ✔ Prettify treats underscores as word breaks (0.00s)
- ✔ Relevant is false for non pass fail events (0.00s)
+ ✔ Relevant is false for non test pass fail events (0.00s)
  ✔ Relevant is true for test pass or fail events (0.00s)
 ```
 

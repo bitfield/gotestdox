@@ -2,9 +2,7 @@ package gotestdox_test
 
 import (
 	"fmt"
-	"strings"
 	"testing"
-	"unicode"
 
 	"github.com/bitfield/gotestdox"
 	"github.com/google/go-cmp/cmp"
@@ -22,6 +20,13 @@ func TestPrettify(t *testing.T) {
 	}
 }
 
+func BenchmarkPrettify(b *testing.B) {
+	input := "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine"
+	for i := 0; i < b.N; i++ {
+		_ = gotestdox.Prettify(input)
+	}
+}
+
 func ExamplePrettify() {
 	input := "TestFoo/has_well-formed_output"
 	fmt.Println(gotestdox.Prettify(input))
@@ -34,27 +39,6 @@ func ExamplePrettify_underscoreHint() {
 	fmt.Println(gotestdox.Prettify(input))
 	// Output:
 	// HandleInput closes input after reading
-}
-
-func FuzzPrettify(f *testing.F) {
-	for _, tc := range Cases {
-		f.Add(tc.input)
-	}
-	f.Fuzz(func(t *testing.T, input string) {
-		if len(input) > 0 && unicode.IsLower([]rune(input)[0]) {
-			t.Skip()
-		}
-		got := gotestdox.Prettify(input)
-		if got == "" {
-			t.Skip()
-		}
-		if strings.ContainsRune(got, '_') {
-			t.Errorf("%q: contains underscore %q", input, got)
-		}
-		if strings.ContainsRune(got, '/') {
-			t.Errorf("%q: contains slash %q", input, got)
-		}
-	})
 }
 
 var Cases = []struct {
@@ -194,5 +178,30 @@ var Cases = []struct {
 		name:  "keeps together hyphenated words with initialisms",
 		input: "TestListObjects/FS-Test71",
 		want:  "List objects FS-test 71",
+	},
+	{
+		name:  "keeps together digits in numbers that are standalone words",
+		input: "TestLex11",
+		want:  "Lex 11",
+	},
+	{
+		name:  "handles a test with no name, but with subtests",
+		input: "Test/default/issue12839",
+		want:  "Default issue 12839",
+	},
+	{
+		name:  "does not break words when a digit follows an = sign",
+		input: "TestUniformFactorial/n=3",
+		want:  "Uniform factorial n=3",
+	},
+	{
+		name:  "preserves initialisms containing digits",
+		input: "TestS390XOperandParser",
+		want:  "S390X operand parser",
+	},
+	{
+		name:  "preserves initialisms containing digits with two or more leading alpha characters",
+		input: "TestBC35A",
+		want:  "BC35A",
 	},
 }

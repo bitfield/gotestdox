@@ -84,7 +84,7 @@ func (td *TestDoxer) Filter() {
 		}
 		if event.Package != curPkg {
 			if curPkg != "" {
-				fmt.Fprintln(td.Stdout, curPkg)
+				fmt.Fprintln(td.Stdout)
 			}
 			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
 			curPkg = event.Package
