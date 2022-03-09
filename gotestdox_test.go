@@ -76,7 +76,7 @@ func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 	}
 }
 
-func TestRelevantIsFalseForNonPassFailEvents(t *testing.T) {
+func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
 		{
@@ -158,7 +158,7 @@ func TestFilterSetsOKToFalseIfAnyTestFails(t *testing.T) {
 	}
 }
 
-func TestFilterReturnsNotOKOnParsingError(t *testing.T) {
+func TestFilterSetsOKToFalseOnParsingError(t *testing.T) {
 	t.Parallel()
 	td := gotestdox.TestDoxer{
 		Stdin:  strings.NewReader("invalid"),
@@ -171,7 +171,7 @@ func TestFilterReturnsNotOKOnParsingError(t *testing.T) {
 	}
 }
 
-func TestExecGoTest_ReturnsOKWhenTestsPass(t *testing.T) {
+func TestExecGoTest_SetsOKToTrueWhenTestsPass(t *testing.T) {
 	t.Parallel()
 	path := newTempTestPath(t, passingTest)
 	td := gotestdox.TestDoxer{
@@ -185,7 +185,7 @@ func TestExecGoTest_ReturnsOKWhenTestsPass(t *testing.T) {
 	}
 }
 
-func TestExecGoTest_ReturnsNotOKWhenTestsFail(t *testing.T) {
+func TestExecGoTest_SetsOKToFalseWhenTestsFail(t *testing.T) {
 	t.Parallel()
 	path := newTempTestPath(t, failingTest)
 	td := gotestdox.TestDoxer{
@@ -199,7 +199,7 @@ func TestExecGoTest_ReturnsNotOKWhenTestsFail(t *testing.T) {
 	}
 }
 
-func TestExecGoTest_ReturnsNotOKWhenCommandErrors(t *testing.T) {
+func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 	t.Parallel()
 	td := gotestdox.TestDoxer{
 		Stdout: io.Discard,
