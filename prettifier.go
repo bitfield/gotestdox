@@ -74,7 +74,7 @@ func (p *prettifier) backup() {
 }
 
 func (p *prettifier) next() rune {
-	if p.pos > len(p.input) {
+	if p.pos >= len(p.input) {
 		return eof
 	}
 	next := p.input[p.pos]
@@ -127,7 +127,6 @@ func start(p *prettifier) stateFunc {
 	case r == eof:
 		return nil
 	case unicode.IsUpper(r):
-		p.pos++
 		return inWordUpper
 	// case r == '/':
 	// 	p.inSubTest = true
@@ -210,7 +209,6 @@ func inWordUpper(p *prettifier) stateFunc {
 	p.debugState("inWordUpper")
 	switch r := p.next(); {
 	case r == eof:
-		p.backup()
 		p.emit()
 		return nil
 	// case unicode.IsUpper(r), unicode.IsDigit(r):
@@ -228,46 +226,51 @@ func inWordUpper(p *prettifier) stateFunc {
 	// 	p.emitWord()
 	// 	return betweenWords
 	default:
-		return nil
+		return inWordLower
 		// 	p.curWord = strings.ToLower(p.curWord)
 		// 	p.emitRune(r)
 		// 	return inWordLower
 	}
 }
 
-// func inWordLower(p *prettifier) stateFunc {
-// 	p.log("inWordLower", p.curWord, string(r))
-// 	switch {
-// 	case unicode.IsUpper(r):
-// 		if strings.HasSuffix(p.curWord, "-") {
-// 			p.emitRune(r)
-// 			return inWordUpper
-// 		}
-// 		p.emitWord()
-// 		p.emitRune(r)
-// 		return inWordUpper
-// 	case unicode.IsDigit(r):
-// 		if !strings.HasSuffix(p.curWord, "-") && !strings.HasSuffix(p.curWord, "=") {
-// 			p.emitWord()
-// 		}
-// 		p.emitRune(r)
-// 		return inNumber
-// 	case r == '_':
-// 		p.emitWord()
-// 		if !p.seenUnderscore && !p.inSubTest {
-// 			p.multiWordFunction()
-// 			p.seenUnderscore = true
-// 		}
-// 		return inWordLower
-// 	case r == '/':
-// 		p.inSubTest = true
-// 		p.emitWord()
-// 		return betweenWords
-// 	default:
-// 		p.emitRune(r)
-// 		return inWordLower
-// 	}
-// }
+func inWordLower(p *prettifier) stateFunc {
+	p.debugState("inWordLower")
+	for {
+		switch r := p.next(); {
+		case r == eof:
+			p.emit()
+			return nil
+			// case unicode.IsUpper(r):
+			// 	if strings.HasSuffix(p.curWord, "-") {
+			// 		p.emitRune(r)
+			// 		return inWordUpper
+			// 	}
+			// 	p.emitWord()
+			// 	p.emitRune(r)
+			// 	return inWordUpper
+			// case unicode.IsDigit(r):
+			// 	if !strings.HasSuffix(p.curWord, "-") && !strings.HasSuffix(p.curWord, "=") {
+			// 		p.emitWord()
+			// 	}
+			// 	p.emitRune(r)
+			// 	return inNumber
+			// case r == '_':
+			// 	p.emitWord()
+			// 	if !p.seenUnderscore && !p.inSubTest {
+			// 		p.multiWordFunction()
+			// 		p.seenUnderscore = true
+			// 	}
+			// 	return inWordLower
+			// case r == '/':
+			// 	p.inSubTest = true
+			// 	p.emitWord()
+			// 	return betweenWords
+			// default:
+			// 	p.emitRune(r)
+			// 	return inWordLower
+		}
+	}
+}
 
 // func inNumber(p *prettifier) stateFunc {
 // 	p.log("inNumber", p.curWord, string(r))

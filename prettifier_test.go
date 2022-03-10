@@ -45,9 +45,14 @@ var Cases = []struct {
 	name, input, want string
 }{
 	{
-		name:  "easy",
+		name:  "accepts a single-letter test name",
 		input: "TestS",
 		want:  "S",
+	},
+	{
+		name:  "accepts a single-word test name",
+		input: "TestSum",
+		want:  "Sum",
 	},
 	// {
 	// 	name:  "correctly renders a well-formed test name",
