@@ -54,16 +54,16 @@ var Cases = []struct {
 		input: "TestSum",
 		want:  "Sum",
 	},
-	// {
-	// 	name:  "correctly renders a well-formed test name",
-	// 	input: "TestSumCorrectlySumsInputNumbers",
-	// 	want:  "Sum correctly sums input numbers",
-	// },
-	// {
-	// 	name:  "preserves capitalisation of initialisms such as PDF",
-	// 	input: "TestFooGeneratesValidPDFFile",
-	// 	want:  "Foo generates valid PDF file",
-	// },
+	{
+		name:  "replaces camel-case transitions with spaces",
+		input: "TestSumCorrectlySumsInputNumbers",
+		want:  "Sum correctly sums input numbers",
+	},
+	{
+		name:  "preserves capitalisation of initialisms such as PDF",
+		input: "TestFooGeneratesValidPDFFile",
+		want:  "Foo generates valid PDF file",
+	},
 	// {
 	// 	name:  "preserves capitalisation of initialism when it is the first word",
 	// 	input: "TestJSONSucks",

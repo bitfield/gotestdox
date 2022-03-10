@@ -49,9 +49,6 @@ func Prettify(tname string) string {
 	for state := start; state != nil; {
 		state = state(p)
 	}
-	if len(p.words) > 0 {
-		p.words[0] = strings.Title(p.words[0])
-	}
 	p.log(fmt.Sprintf("%#v\n", p.words))
 	return strings.Join(p.words, " ")
 }
@@ -69,6 +66,13 @@ type prettifier struct {
 
 const eof rune = 0
 
+type wordCase int
+
+const (
+	allLower wordCase = iota
+	allUpper
+)
+
 func (p *prettifier) backup() {
 	p.pos--
 }
@@ -82,9 +86,21 @@ func (p *prettifier) next() rune {
 	return next
 }
 
-func (p *prettifier) emit() {
-	p.log(fmt.Sprintf("emit %q", string(p.input[p.start:p.pos])))
-	p.words = append(p.words, string(p.input[p.start:p.pos]))
+func (p *prettifier) emit(c wordCase) {
+	word := string(p.input[p.start:p.pos])
+	if word == "" {
+		return
+	}
+	switch {
+	case len(p.words) == 0:
+		word = strings.Title(word)
+	case c == allLower:
+		word = strings.ToLower(word)
+	case c == allUpper:
+		word = strings.ToUpper(word)
+	}
+	p.log(fmt.Sprintf("emit %q", word))
+	p.words = append(p.words, word)
 	p.start = p.pos
 }
 
@@ -137,80 +153,91 @@ func start(p *prettifier) stateFunc {
 	}
 }
 
-// func betweenWords(p *prettifier) stateFunc {
-// 	p.log("betweenWords", p.curWord, string(r))
-// 	switch {
-// 	case unicode.IsUpper(r):
-// 		p.emitRune(r)
-// 		return inWordUpper
-// 	case unicode.IsLower(r):
-// 		p.emitRune(r)
-// 		return inWordLower
-// 	case r == '_':
-// 		p.seenUnderscore = true
-// 		return betweenWords
-// 	case r == '/':
-// 		p.inSubTest = true
-// 		return betweenWords
-// 	default:
-// 		p.emitRune(r)
-// 		return inWordLower
-// 	}
-// }
+func betweenWords(p *prettifier) stateFunc {
+	for {
+		p.debugState("betweenWords")
+		switch r := p.next(); {
+		case unicode.IsUpper(r):
+			return inWordUpper
+			// case unicode.IsLower(r):
+			// 	p.emitRune(r)
+			// 	return inWordLower
+			// case r == '_':
+			// 	p.seenUnderscore = true
+			// 	return betweenWords
+			// case r == '/':
+			// 	p.inSubTest = true
+			// 	return betweenWords
+			// default:
+			// 	p.emitRune(r)
+			// 	return inWordLower
+		}
+	}
+}
 
-// func inInitialism(p *prettifier) stateFunc {
-// 	p.log("inInitialism", p.curWord, string(r))
-// 	switch {
-// 	case unicode.IsLower(r):
-// 		// If we see a lowercase rune, it means we're already one rune
-// 		// into the next word. We need to emit the previous word, and
-// 		// reset the current word to be just the previous rune, before
-// 		// adding the current rune to it.
-// 		prev := p.curWord[:len(p.curWord)-1]
-// 		if len(prev) == 1 {
-// 			prev = strings.ToLower(prev)
-// 		}
-// 		p.log("emit", prev)
-// 		p.words = append(p.words, prev)
-// 		p.curWord = strings.ToLower(string(p.curWord[len(p.curWord)-1]))
-// 		p.emitRune(r)
-// 		return inWordLower
-// 	case unicode.IsUpper(r):
-// 		// A hyphen marks the end of an initialism
-// 		if strings.Contains(p.curWord, "-") {
-// 			p.emitRune(unicode.ToLower(r))
-// 			return inWordLower
-// 		}
-// 		p.emitRune(r)
-// 		return inInitialism
-// 	case r == '_':
-// 		p.emitWord()
-// 		// If this is the first underscore we've seen, and we're not yet
-// 		// in a subtest name, then treat all the words we've seen so far
-// 		// as making up the name of a multiword function ('HandleInput')
-// 		if !p.seenUnderscore && !p.inSubTest {
-// 			p.multiWordFunction()
-// 			p.seenUnderscore = true
-// 		}
-// 		return inWordLower
-// 	case r == '/':
-// 		// We're entering a subtest name, so from now on the multiword
-// 		// function rule will be disabled
-// 		p.inSubTest = true
-// 		p.emitWord()
-// 		return betweenWords
-// 	default:
-// 		p.emitRune(r)
-// 		return inInitialism
-// 	}
-// }
+func inInitialism(p *prettifier) stateFunc {
+	for {
+		p.debugState("inInitialism")
+		switch r := p.next(); {
+		case unicode.IsLower(r):
+			p.backup()
+			p.backup()
+			p.emit(allUpper)
+			return inWordLower
+			// case unicode.IsLower(r):
+			// 	// If we see a lowercase rune, it means we're already one rune
+			// 	// into the next word. We need to emit the previous word, and
+			// 	// reset the current word to be just the previous rune, before
+			// 	// adding the current rune to it.
+			// 	prev := p.curWord[:len(p.curWord)-1]
+			// 	if len(prev) == 1 {
+			// 		prev = strings.ToLower(prev)
+			// 	}
+			// 	p.log("emit", prev)
+			// 	p.words = append(p.words, prev)
+			// 	p.curWord = strings.ToLower(string(p.curWord[len(p.curWord)-1]))
+			// 	p.emitRune(r)
+			// 	return inWordLower
+			// case unicode.IsUpper(r):
+			// 	// A hyphen marks the end of an initialism
+			// 	if strings.Contains(p.curWord, "-") {
+			// 		p.emitRune(unicode.ToLower(r))
+			// 		return inWordLower
+			// 	}
+			// 	p.emitRune(r)
+			// 	return inInitialism
+			// case r == '_':
+			// 	p.emitWord()
+			// 	// If this is the first underscore we've seen, and we're not yet
+			// 	// in a subtest name, then treat all the words we've seen so far
+			// 	// as making up the name of a multiword function ('HandleInput')
+			// 	if !p.seenUnderscore && !p.inSubTest {
+			// 		p.multiWordFunction()
+			// 		p.seenUnderscore = true
+			// 	}
+			// 	return inWordLower
+			// case r == '/':
+			// 	// We're entering a subtest name, so from now on the multiword
+			// 	// function rule will be disabled
+			// 	p.inSubTest = true
+			// 	p.emitWord()
+			// 	return betweenWords
+			// default:
+			// 	p.emitRune(r)
+			// 	return inInitialism
+			// }
+		}
+	}
+}
 
 func inWordUpper(p *prettifier) stateFunc {
 	p.debugState("inWordUpper")
 	switch r := p.next(); {
 	case r == eof:
-		p.emit()
+		p.emit(allLower)
 		return nil
+	case unicode.IsUpper(r):
+		return inInitialism
 	// case unicode.IsUpper(r), unicode.IsDigit(r):
 	// 	p.pos++
 	// 	return inInitialism
@@ -234,12 +261,16 @@ func inWordUpper(p *prettifier) stateFunc {
 }
 
 func inWordLower(p *prettifier) stateFunc {
-	p.debugState("inWordLower")
 	for {
+		p.debugState("inWordLower")
 		switch r := p.next(); {
 		case r == eof:
-			p.emit()
+			p.emit(allLower)
 			return nil
+		case unicode.IsUpper(r):
+			p.backup()
+			p.emit(allLower)
+			return betweenWords
 			// case unicode.IsUpper(r):
 			// 	if strings.HasSuffix(p.curWord, "-") {
 			// 		p.emitRune(r)
