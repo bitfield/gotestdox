@@ -164,6 +164,10 @@ func start(p *prettifier) stateFunc {
 		switch r := p.next(); {
 		case r == '_':
 			p.skip()
+		case r == '/':
+			p.skip()
+			p.inSubTest = true
+			return betweenWords
 		case r == eof:
 			return nil
 		case unicode.IsUpper(r):
