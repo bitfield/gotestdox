@@ -40,19 +40,18 @@ var DebugWriter io.Writer = os.Stderr
 // If the GOTESTDOX_DEBUG environment variable is set, Prettify will output
 // (copious) debug information to os.Stderr, elaborating on its decisions.
 func Prettify(input string) string {
-	trimmed := strings.TrimPrefix(input, "Test")
 	p := &prettifier{
-		input: []rune(trimmed),
+		input: []rune(strings.TrimPrefix(input, "Test")),
 		words: []string{},
 	}
 	if os.Getenv("GOTESTDOX_DEBUG") != "" {
 		p.debug = DebugWriter
 	}
-	p.log("input", input)
+	p.log("input:", input)
 	for state := betweenWords; state != nil; {
 		state = state(p)
 	}
-	p.log(fmt.Sprintf("%#v\n", p.words))
+	p.log("result:", p.words, "\n")
 	return strings.Join(p.words, " ")
 }
 
@@ -149,18 +148,15 @@ func (p *prettifier) log(args ...interface{}) {
 }
 
 func (p *prettifier) logState(stateName string) {
-	if p.debug == nil {
-		return
-	}
 	next := "EOF"
 	if p.pos < len(p.input) {
 		next = string(p.input[p.pos])
 	}
-	fmt.Fprintf(p.debug, "%s: [%s] -> %s\n",
+	p.log(fmt.Sprintf("%s: [%s] -> %s",
 		stateName,
 		string(p.input[p.start:p.pos]),
 		next,
-	)
+	))
 }
 
 type stateFunc func(p *prettifier) stateFunc
@@ -176,7 +172,7 @@ func betweenWords(p *prettifier) stateFunc {
 		case r == '/':
 			p.skip()
 			p.inSubTest = true
-		case r == '-', unicode.IsLetter(r):
+		default:
 			return inWord
 		}
 	}
@@ -211,14 +207,6 @@ func inWord(p *prettifier) stateFunc {
 			p.emitLower()
 			p.inSubTest = true
 			return betweenWords
-		case unicode.IsLower(r):
-			p.backup()
-			if p.inInitialism() && (p.pos-p.start) > 1 {
-				p.backup()
-				p.emitUpper()
-				continue
-			}
-			p.next()
 		case unicode.IsUpper(r):
 			p.backup()
 			if p.prev() != '-' && !p.inInitialism() {
@@ -230,6 +218,14 @@ func inWord(p *prettifier) stateFunc {
 			p.backup()
 			if !unicode.IsDigit(p.prev()) && p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
 				p.emitLower()
+			}
+			p.next()
+		default:
+			p.backup()
+			if p.inInitialism() && (p.pos-p.start) > 1 {
+				p.backup()
+				p.emitUpper()
+				continue
 			}
 			p.next()
 		}
