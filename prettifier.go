@@ -228,7 +228,11 @@ func inWord(p *prettifier) stateFunc {
 			return nil
 		case r == '_':
 			p.backup()
-			p.emitLower()
+			if p.inInitialism() {
+				p.emitUpper()
+			} else {
+				p.emitLower()
+			}
 			if !p.seenUnderscore && !p.inSubTest {
 				p.multiWordFunction()
 				return betweenWords

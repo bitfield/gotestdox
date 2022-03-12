@@ -114,31 +114,31 @@ var Cases = []struct {
 		input: "TestFooDoesAThing",
 		want:  "Foo does a thing",
 	},
-	// {
-	// 	name:  "renders subtest names without the slash, and with underscores replaced by spaces",
-	// 	input: "TestSliceSink/Empty_line_between_two_existing_lines",
-	// 	want:  "Slice sink empty line between two existing lines",
-	// },
-	// {
-	// 	name:  "inserts a word break before subtest names beginning with a lowercase letter",
-	// 	input: "TestExec/go_help",
-	// 	want:  "Exec go help",
-	// },
-	// {
-	// 	name:  "is okay with test names not in the form of a sentence",
-	// 	input: "TestMatch",
-	// 	want:  "Match",
-	// },
-	// {
-	// 	name:  "treats a single underscore as marking the end of a multiword function name",
-	// 	input: "TestFindFiles_WorksCorrectly",
-	// 	want:  "FindFiles works correctly",
-	// },
-	// {
-	// 	name:  "retains capitalisation of initialisms in a multiword function name",
-	// 	input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",
-	// 	want:  "ParseJSON correctly parses a single go test JSON output line",
-	// },
+	{
+		name:  "renders subtest names without the slash, and with underscores replaced by spaces",
+		input: "TestSliceSink/Empty_line_between_two_existing_lines",
+		want:  "Slice sink empty line between two existing lines",
+	},
+	{
+		name:  "inserts a word break before subtest names beginning with a lowercase letter",
+		input: "TestExec/go_help",
+		want:  "Exec go help",
+	},
+	{
+		name:  "is okay with test names not in the form of a sentence",
+		input: "TestMatch",
+		want:  "Match",
+	},
+	{
+		name:  "treats a single underscore as marking the end of a multiword function name",
+		input: "TestFindFiles_WorksCorrectly",
+		want:  "FindFiles works correctly",
+	},
+	{
+		name:  "retains capitalisation of initialisms in a multiword function name",
+		input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",
+		want:  "ParseJSON correctly parses a single go test JSON output line",
+	},
 	// {
 	// 	name:  "treats a single underscore before the first slash as marking the end of a multiword function name",
 	// 	input: "TestFindFiles_/WorksCorrectly",
