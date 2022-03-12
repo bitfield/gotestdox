@@ -82,11 +82,6 @@ var Cases = []struct {
 		want:  "Foo generates valid PDF file",
 	},
 	{
-		name:  "preserves capitalisation of initialism as first word",
-		input: "TestPDF",
-		want:  "PDF",
-	},
-	{
 		name:  "does not hang when name ends with initialism",
 		input: "TestFooGeneratesValidPDF",
 		want:  "Foo generates valid PDF",
