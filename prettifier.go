@@ -171,6 +171,8 @@ func betweenWords(p *prettifier) stateFunc {
 		case r == '/':
 			p.skip()
 			p.inSubTest = true
+		case r == '-':
+			return inNumber
 		case unicode.IsUpper(r):
 			return inWordUpper
 		case unicode.IsLower(r):

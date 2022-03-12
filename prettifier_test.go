@@ -174,11 +174,11 @@ var Cases = []struct {
 		input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
 		want:  "Extract files truncated bzip 2 which will return an error",
 	},
-	// {
-	// 	name:  "recognises a dash followed by a digit as a negative number",
-	// 	input: "TestColumnSelects/column_-1_of_input",
-	// 	want:  "Column selects column -1 of input",
-	// },
+	{
+		name:  "recognises a dash followed by a digit as a negative number",
+		input: "TestColumnSelects/column_-1_of_input",
+		want:  "Column selects column -1 of input",
+	},
 	// {
 	// 	name:  "keeps numbers within a hyphenated word",
 	// 	input: "TestReadExtended/nyc-taxi-data-100k.csv",
