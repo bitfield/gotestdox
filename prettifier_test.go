@@ -89,16 +89,21 @@ var Cases = []struct {
 		input: "TestFooDoes8Things",
 		want:  "Foo does 8 things",
 	},
-	// {
-	// 	name:  "knows that just Test is a valid test name",
-	// 	input: "Test",
-	// 	want:  "",
-	// },
-	// {
-	// 	name:  "treats underscores as word breaks",
-	// 	input: "Test_Foo_GeneratesValidPDFFile",
-	// 	want:  "Foo generates valid PDF file",
-	// },
+	{
+		name:  "keeps a trailing digit as part of an initialism",
+		input: "TestFooGeneratesUTF8Correctly",
+		want:  "Foo generates UTF8 correctly",
+	},
+	{
+		name:  "knows that just Test is a valid test name",
+		input: "Test",
+		want:  "",
+	},
+	{
+		name:  "treats underscores as word breaks",
+		input: "Test_Foo_GeneratesValidPDFFile",
+		want:  "Foo generates valid PDF file",
+	},
 	// {
 	// 	name:  "treats consecutive underscores as a single word break",
 	// 	input: "Test_Foo__Works",
@@ -168,11 +173,6 @@ var Cases = []struct {
 	// 	name:  "does not erase the final digit in words that end with a digit",
 	// 	input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
 	// 	want:  "Extract files truncated bzip 2 which will return an error",
-	// },
-	// {
-	// 	name:  "keeps a trailing digit as part of an initialism",
-	// 	input: "TestExtractFiles/Truncated_BZIP2_which_will_return_an_error",
-	// 	want:  "Extract files truncated BZIP2 which will return an error",
 	// },
 	// {
 	// 	name:  "recognises a dash followed by a digit as a negative number",

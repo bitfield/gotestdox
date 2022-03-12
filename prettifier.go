@@ -77,6 +77,11 @@ func (p *prettifier) backup() {
 	p.pos--
 }
 
+func (p *prettifier) skip() {
+	p.start++
+	p.pos++
+}
+
 func (p *prettifier) next() rune {
 	if p.pos >= len(p.input) {
 		return eof
@@ -138,18 +143,22 @@ func (p *prettifier) debugState(stateName string) {
 type stateFunc func(p *prettifier) stateFunc
 
 func start(p *prettifier) stateFunc {
-	p.debugState("start")
-	switch r := p.next(); {
-	case r == eof:
-		return nil
-	case unicode.IsUpper(r):
-		return inWordUpper
-	// case r == '/':
-	// 	p.inSubTest = true
-	// 	return betweenWords
-	default:
-		p.pos++
-		return start
+	for {
+		p.debugState("start")
+		switch r := p.next(); {
+		case unicode.IsUpper(r):
+			return inWordUpper
+		case r == '_':
+			p.start = p.pos
+		// case r == '/':
+		// 	p.inSubTest = true
+		// 	return betweenWords
+		case r == eof:
+			return nil
+		default:
+			p.pos++
+			return start
+		}
 	}
 }
 
@@ -270,6 +279,11 @@ func inWordLower(p *prettifier) stateFunc {
 		case r == eof:
 			p.emit(allLower)
 			return nil
+		case r == '_':
+			p.backup()
+			p.emit(allLower)
+			p.skip()
+			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
 			p.emit(allLower)
