@@ -8,6 +8,8 @@ import (
 	"unicode"
 )
 
+var DebugWriter io.Writer = os.Stderr
+
 // Prettify takes a string representing the name of a Go test, and attempts to
 // turn it into a readable sentence, by replacing camel-case transitions and
 // underscores with spaces.
@@ -44,7 +46,7 @@ func Prettify(input string) string {
 		words: []string{},
 	}
 	if os.Getenv("GOTESTDOX_DEBUG") != "" {
-		p.debug = os.Stderr
+		p.debug = DebugWriter
 	}
 	p.log("input", input)
 	for state := betweenWords; state != nil; {
@@ -54,8 +56,8 @@ func Prettify(input string) string {
 	return strings.Join(p.words, " ")
 }
 
-// This lexer implementation owes a lot, if not everything, to Rob Pike's talk
-// on 'Lexical Scanning in Go': https://www.youtube.com/watch?v=HxaD_trXwRE
+// Heavily inspired by Rob Pike's talk on 'Lexical Scanning in Go':
+// https://www.youtube.com/watch?v=HxaD_trXwRE
 type prettifier struct {
 	debug          io.Writer
 	input          []rune
@@ -96,15 +98,6 @@ func (p *prettifier) next() rune {
 	next := p.input[p.pos]
 	p.pos++
 	return next
-}
-
-func (p *prettifier) inHyphenation() bool {
-	for _, r := range p.input[p.start:p.pos] {
-		if r == '-' {
-			return true
-		}
-	}
-	return false
 }
 
 func (p *prettifier) inInitialism() bool {
@@ -161,7 +154,7 @@ func (p *prettifier) log(args ...interface{}) {
 	fmt.Fprintln(p.debug, args...)
 }
 
-func (p *prettifier) debugState(stateName string) {
+func (p *prettifier) logState(stateName string) {
 	if p.debug == nil {
 		return
 	}
@@ -180,7 +173,7 @@ type stateFunc func(p *prettifier) stateFunc
 
 func betweenWords(p *prettifier) stateFunc {
 	for {
-		p.debugState("betweenWords")
+		p.logState("betweenWords")
 		switch r := p.next(); {
 		case r == eof:
 			return nil
@@ -197,7 +190,7 @@ func betweenWords(p *prettifier) stateFunc {
 
 func inWord(p *prettifier) stateFunc {
 	for {
-		p.debugState("inWord")
+		p.logState("inWord")
 		switch r := p.next(); {
 		case r == eof:
 			if p.inInitialism() {

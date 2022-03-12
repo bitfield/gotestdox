@@ -1,6 +1,7 @@
 package gotestdox_test
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -17,6 +18,20 @@ func TestPrettify(t *testing.T) {
 				t.Errorf("%s:\ninput: %q:\nresult: %s", tc.name, tc.input, cmp.Diff(tc.want, got))
 			}
 		})
+	}
+}
+
+func TestPrettifierLogsToDebugWriter(t *testing.T) {
+	// can't run in parallel because we set DebugWriter
+	// and GOTESTDOX_DEBUG
+	buf := &bytes.Buffer{}
+	gotestdox.DebugWriter = buf
+	t.Setenv("GOTESTDOX_DEBUG", "1")
+	gotestdox.Prettify("a")
+	want := "input a\nbetweenWords: [] -> a\ninWord: [a] -> EOF\nemit \"A\"\n[]string{\"A\"}\n\n"
+	got := buf.String()
+	if want != got {
+		t.Error(cmp.Diff(want, got))
 	}
 }
 
