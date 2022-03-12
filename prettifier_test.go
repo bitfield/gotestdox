@@ -69,51 +69,51 @@ var Cases = []struct {
 		input: "TestFooGeneratesValidPDF",
 		want:  "Foo generates valid PDF",
 	},
-	// {
-	// 	name:  "preserves capitalisation of initialism when it is the first word",
-	// 	input: "TestJSONSucks",
-	// 	want:  "JSON sucks",
-	// },
-	// {
-	// 	name:  "preserves capitalisation of two-letter initialisms such as OK",
-	// 	input: "TestFilterReturnsOKIfThereAreNoTestFailures",
-	// 	want:  "Filter returns OK if there are no test failures",
-	// },
-	// {
-	// 	name:  "preserves longer all-caps words",
-	// 	input: "TestCategoryTrimsLEADINGSpacesFromValidCategory",
-	// 	want:  "Category trims LEADING spaces from valid category",
-	// },
-	// {
-	// 	name:  "treats numbers as word separators",
-	// 	input: "TestFooDoes8Things",
-	// 	want:  "Foo does 8 things",
-	// },
-	// {
-	// 	name:  "keeps a trailing digit as part of an initialism",
-	// 	input: "TestFooGeneratesUTF8Correctly",
-	// 	want:  "Foo generates UTF8 correctly",
-	// },
-	// {
-	// 	name:  "knows that just Test is a valid test name",
-	// 	input: "Test",
-	// 	want:  "",
-	// },
-	// {
-	// 	name:  "treats underscores as word breaks",
-	// 	input: "Test_Foo_GeneratesValidPDFFile",
-	// 	want:  "Foo generates valid PDF file",
-	// },
-	// {
-	// 	name:  "treats consecutive underscores as a single word break",
-	// 	input: "Test_Foo__Works",
-	// 	want:  "Foo works",
-	// },
-	// {
-	// 	name:  "doesn't incorrectly title-case single-letter words",
-	// 	input: "TestFooDoesAThing",
-	// 	want:  "Foo does a thing",
-	// },
+	{
+		name:  "preserves capitalisation of initialism when it is the first word",
+		input: "TestJSONSucks",
+		want:  "JSON sucks",
+	},
+	{
+		name:  "preserves capitalisation of two-letter initialisms such as OK",
+		input: "TestFilterReturnsOKIfThereAreNoTestFailures",
+		want:  "Filter returns OK if there are no test failures",
+	},
+	{
+		name:  "preserves longer all-caps words",
+		input: "TestCategoryTrimsLEADINGSpacesFromValidCategory",
+		want:  "Category trims LEADING spaces from valid category",
+	},
+	{
+		name:  "treats numbers as word separators",
+		input: "TestFooDoes8Things",
+		want:  "Foo does 8 things",
+	},
+	{
+		name:  "keeps a trailing digit as part of an initialism",
+		input: "TestFooGeneratesUTF8Correctly",
+		want:  "Foo generates UTF8 correctly",
+	},
+	{
+		name:  "knows that just Test is a valid test name",
+		input: "Test",
+		want:  "",
+	},
+	{
+		name:  "treats underscores as word breaks",
+		input: "Test_Foo_GeneratesValidPDFFile",
+		want:  "Foo generates valid PDF file",
+	},
+	{
+		name:  "treats consecutive underscores as a single word break",
+		input: "Test_Foo__Works",
+		want:  "Foo works",
+	},
+	{
+		name:  "doesn't incorrectly title-case single-letter words",
+		input: "TestFooDoesAThing",
+		want:  "Foo does a thing",
+	},
 	// {
 	// 	name:  "renders subtest names without the slash, and with underscores replaced by spaces",
 	// 	input: "TestSliceSink/Empty_line_between_two_existing_lines",

@@ -123,6 +123,8 @@ func (p *prettifier) emit(c wordCase) {
 	switch {
 	case len(p.words) == 0:
 		word = strings.Title(word)
+	case len(word) == 1:
+		word = strings.ToLower(word)
 	case c == allLower:
 		word = strings.ToLower(word)
 	case c == allUpper:
@@ -189,9 +191,6 @@ func start(p *prettifier) stateFunc {
 			return nil
 		case unicode.IsUpper(r):
 			return inWord
-		// case r == '/':
-		// 	p.inSubTest = true
-		// 	return betweenWords
 		default:
 			p.pos++
 			return start
@@ -210,22 +209,8 @@ func betweenWords(p *prettifier) stateFunc {
 			p.inSubTest = true
 		case r == '-':
 			return inNumber
-		case unicode.IsUpper(r):
+		case unicode.IsLetter(r):
 			return inWord
-		case unicode.IsLower(r):
-			return inWord
-			// case unicode.IsLower(r):
-			// 	p.emitRune(r)
-			// 	return inWordLower
-			// case r == '_':
-			// 	p.seenUnderscore = true
-			// 	return betweenWords
-			// case r == '/':
-			// 	p.inSubTest = true
-			// 	return betweenWords
-			// default:
-			// 	p.emitRune(r)
-			// 	return inWordLower
 		}
 	}
 }
@@ -275,34 +260,6 @@ func inWord(p *prettifier) stateFunc {
 				p.emitLower()
 			}
 			return inNumber
-			// case unicode.IsUpper(r):
-			// 	if strings.HasSuffix(p.curWord, "-") {
-			// 		p.emitRune(r)
-			// 		return inWordUpper
-			// 	}
-			// 	p.emitWord()
-			// 	p.emitRune(r)
-			// 	return inWordUpper
-			// case unicode.IsDigit(r):
-			// 	if !strings.HasSuffix(p.curWord, "-") && !strings.HasSuffix(p.curWord, "=") {
-			// 		p.emitWord()
-			// 	}
-			// 	p.emitRune(r)
-			// 	return inNumber
-			// case r == '_':
-			// 	p.emitWord()
-			// 	if !p.seenUnderscore && !p.inSubTest {
-			// 		p.multiWordFunction()
-			// 		p.seenUnderscore = true
-			// 	}
-			// 	return inWordLower
-			// case r == '/':
-			// 	p.inSubTest = true
-			// 	p.emitWord()
-			// 	return betweenWords
-			// default:
-			// 	p.emitRune(r)
-			// 	return inWordLower
 		}
 	}
 }
@@ -324,19 +281,6 @@ func inNumber(p *prettifier) stateFunc {
 				p.emitLower()
 			}
 			return inWord
-			// 	case unicode.IsDigit(r):
-			// 		p.emitRune(r)
-			// 		return inNumber
-			// 	case r == '_':
-			// 		p.emitWord()
-			// 		return betweenWords
-			// 	case r == '/':
-			// 		p.inSubTest = true
-			// 		p.emitWord()
-			// 		return betweenWords
-			// 	default:
-			// 		p.emitRune(r)
-			// 		return betweenWords
 		}
 	}
 }
