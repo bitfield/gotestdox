@@ -133,6 +133,14 @@ func (p *prettifier) emit(c wordCase) {
 	p.start = p.pos
 }
 
+func (p *prettifier) emitUpper() {
+	p.emit(allUpper)
+}
+
+func (p *prettifier) emitLower() {
+	p.emit(allLower)
+}
+
 func (p *prettifier) multiWordFunction() {
 	var fname string
 	for _, w := range p.words {
@@ -227,11 +235,15 @@ func inWord(p *prettifier) stateFunc {
 		p.debugState("inWord")
 		switch r := p.next(); {
 		case r == eof:
-			p.emit(allLower)
+			if p.inInitialism() {
+				p.emitUpper()
+			} else {
+				p.emitLower()
+			}
 			return nil
 		case r == '_':
 			p.backup()
-			p.emit(allLower)
+			p.emitLower()
 			if !p.seenUnderscore && !p.inSubTest {
 				p.multiWordFunction()
 				return betweenWords
@@ -240,27 +252,27 @@ func inWord(p *prettifier) stateFunc {
 			return betweenWords
 		case r == '/':
 			p.backup()
-			p.emit(allLower)
+			p.emitLower()
 			p.inSubTest = true
 			return betweenWords
 		case unicode.IsLower(r):
 			p.backup()
 			if p.inInitialism() && (p.pos-p.start) > 1 {
 				p.backup()
-				p.emit(allUpper)
+				p.emitUpper()
 				return inWord
 			}
 			p.next()
 		case unicode.IsUpper(r):
 			if p.prev() != '-' && !p.inInitialism() {
 				p.backup()
-				p.emit(allLower)
+				p.emitLower()
 				return betweenWords
 			}
 		case unicode.IsDigit(r):
 			p.backup()
 			if p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
-				p.emit(allLower)
+				p.emitLower()
 			}
 			return inNumber
 			// case unicode.IsUpper(r):
@@ -300,16 +312,16 @@ func inNumber(p *prettifier) stateFunc {
 		p.debugState("inNumber")
 		switch r := p.next(); {
 		case r == eof:
-			p.emit(allLower)
+			p.emitLower()
 			return nil
 		case r == '_':
 			p.backup()
-			p.emit(allLower)
+			p.emitLower()
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
 			if !p.inInitialism() {
-				p.emit(allLower)
+				p.emitLower()
 			}
 			return inWord
 			// 	case unicode.IsDigit(r):

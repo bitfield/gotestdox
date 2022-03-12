@@ -64,11 +64,11 @@ var Cases = []struct {
 		input: "TestFooGeneratesValidPDFFile",
 		want:  "Foo generates valid PDF file",
 	},
-	// {
-	// 	name:  "does not hang when name ends with initialism",
-	// 	input: "TestFooGeneratesValidPDF",
-	// 	want:  "Foo generates valid PDF",
-	// },
+	{
+		name:  "does not hang when name ends with initialism",
+		input: "TestFooGeneratesValidPDF",
+		want:  "Foo generates valid PDF",
+	},
 	// {
 	// 	name:  "preserves capitalisation of initialism when it is the first word",
 	// 	input: "TestJSONSucks",
