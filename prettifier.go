@@ -202,6 +202,8 @@ func betweenWords(p *prettifier) stateFunc {
 	for {
 		p.debugState("betweenWords")
 		switch r := p.next(); {
+		case r == eof:
+			return nil
 		case r == '_':
 			p.skip()
 		case r == '/':
