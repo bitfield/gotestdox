@@ -194,6 +194,18 @@ func inInitialism(p *prettifier) stateFunc {
 	for {
 		p.debugState("inInitialism")
 		switch r := p.next(); {
+		case r == eof:
+			p.emit(allUpper)
+			return nil
+		case r == '_':
+			p.backup()
+			p.emit(allUpper)
+			if !p.seenUnderscore && !p.inSubTest {
+				p.multiWordFunction()
+				return betweenWords
+			}
+			p.skip()
+			return betweenWords
 		case unicode.IsLower(r):
 			p.backup()
 			p.backup()
@@ -203,9 +215,6 @@ func inInitialism(p *prettifier) stateFunc {
 			}
 			p.emit(wordCase)
 			return inWordLower
-		case r == eof:
-			p.emit(allUpper)
-			return nil
 			// case unicode.IsLower(r):
 			// 	// If we see a lowercase rune, it means we're already one rune
 			// 	// into the next word. We need to emit the previous word, and

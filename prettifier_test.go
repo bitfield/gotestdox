@@ -134,11 +134,11 @@ var Cases = []struct {
 		input: "TestFindFiles_WorksCorrectly",
 		want:  "FindFiles works correctly",
 	},
-	// {
-	// 	name:  "retains capitalisation of initialisms in a multiword function name",
-	// 	input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",
-	// 	want:  "ParseJSON correctly parses a single go test JSON output line",
-	// },
+	{
+		name:  "retains capitalisation of initialisms in a multiword function name",
+		input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",
+		want:  "ParseJSON correctly parses a single go test JSON output line",
+	},
 	// {
 	// 	name:  "treats a single underscore before the first slash as marking the end of a multiword function name",
 	// 	input: "TestFindFiles_/WorksCorrectly",
