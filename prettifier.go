@@ -78,8 +78,7 @@ func (p *prettifier) backup() {
 }
 
 func (p *prettifier) skip() {
-	p.start++
-	p.pos++
+	p.start = p.pos
 }
 
 func (p *prettifier) next() rune {
@@ -146,15 +145,15 @@ func start(p *prettifier) stateFunc {
 	for {
 		p.debugState("start")
 		switch r := p.next(); {
+		case r == '_':
+			p.skip()
+		case r == eof:
+			return nil
 		case unicode.IsUpper(r):
 			return inWordUpper
-		case r == '_':
-			p.start = p.pos
 		// case r == '/':
 		// 	p.inSubTest = true
 		// 	return betweenWords
-		case r == eof:
-			return nil
 		default:
 			p.pos++
 			return start
@@ -166,6 +165,8 @@ func betweenWords(p *prettifier) stateFunc {
 	for {
 		p.debugState("betweenWords")
 		switch r := p.next(); {
+		case r == '_':
+			p.skip()
 		case unicode.IsUpper(r):
 			return inWordUpper
 			// case unicode.IsLower(r):

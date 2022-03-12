@@ -104,11 +104,11 @@ var Cases = []struct {
 		input: "Test_Foo_GeneratesValidPDFFile",
 		want:  "Foo generates valid PDF file",
 	},
-	// {
-	// 	name:  "treats consecutive underscores as a single word break",
-	// 	input: "Test_Foo__Works",
-	// 	want:  "Foo works",
-	// },
+	{
+		name:  "treats consecutive underscores as a single word break",
+		input: "Test_Foo__Works",
+		want:  "Foo works",
+	},
 	// {
 	// 	name:  "doesn't incorrectly title-case single-letter words",
 	// 	input: "TestFooDoesAThing",
