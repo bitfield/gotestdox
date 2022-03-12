@@ -139,41 +139,41 @@ var Cases = []struct {
 		input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",
 		want:  "ParseJSON correctly parses a single go test JSON output line",
 	},
-	// {
-	// 	name:  "treats a single underscore before the first slash as marking the end of a multiword function name",
-	// 	input: "TestFindFiles_/WorksCorrectly",
-	// 	want:  "FindFiles works correctly",
-	// },
-	// {
-	// 	name:  "handles multiple underscores, with the first marking the end of a multiword function name",
-	// 	input: "TestFindFiles_Does_Stuff",
-	// 	want:  "FindFiles does stuff",
-	// },
-	// {
-	// 	name:  "does not treat an underscore in a subtest name as marking the end of a multiword function name",
-	// 	input: "TestCallingTheFunction/Does_Stuff",
-	// 	want:  "Calling the function does stuff",
-	// },
-	// {
-	// 	name:  "eliminates any words containing underscores after splitting",
-	// 	input: "TestSentence/does_x,_correctly",
-	// 	want:  "Sentence does x, correctly",
-	// },
-	// {
-	// 	name:  "retains hyphenated words in their original form",
-	// 	input: "TestFoo/has_well-formed_output",
-	// 	want:  "Foo has well-formed output",
-	// },
-	// {
-	// 	name:  "retains apostrophised words in their original form",
-	// 	input: "TestFoo/does_what's_required",
-	// 	want:  "Foo does what's required",
-	// },
-	// {
-	// 	name:  "does not erase the final digit in words that end with a digit",
-	// 	input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
-	// 	want:  "Extract files truncated bzip 2 which will return an error",
-	// },
+	{
+		name:  "treats a single underscore before the first slash as marking the end of a multiword function name",
+		input: "TestFindFiles_/WorksCorrectly",
+		want:  "FindFiles works correctly",
+	},
+	{
+		name:  "handles multiple underscores, with the first marking the end of a multiword function name",
+		input: "TestFindFiles_Does_Stuff",
+		want:  "FindFiles does stuff",
+	},
+	{
+		name:  "does not treat an underscore in a subtest name as marking the end of a multiword function name",
+		input: "TestCallingTheFunction/Does_Stuff",
+		want:  "Calling the function does stuff",
+	},
+	{
+		name:  "eliminates any words containing underscores after splitting",
+		input: "TestSentence/does_x,_correctly",
+		want:  "Sentence does x, correctly",
+	},
+	{
+		name:  "retains hyphenated words in their original form",
+		input: "TestFoo/has_well-formed_output",
+		want:  "Foo has well-formed output",
+	},
+	{
+		name:  "retains apostrophised words in their original form",
+		input: "TestFoo/does_what's_required",
+		want:  "Foo does what's required",
+	},
+	{
+		name:  "does not erase the final digit in words that end with a digit",
+		input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
+		want:  "Extract files truncated bzip 2 which will return an error",
+	},
 	// {
 	// 	name:  "recognises a dash followed by a digit as a negative number",
 	// 	input: "TestColumnSelects/column_-1_of_input",

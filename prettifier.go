@@ -115,6 +115,7 @@ func (p *prettifier) multiWordFunction() {
 	}
 	p.log("multiword function", fname)
 	p.words = []string{fname}
+	p.seenUnderscore = true
 }
 
 func (p *prettifier) log(args ...interface{}) {
@@ -354,8 +355,14 @@ func inWordLower(p *prettifier) stateFunc {
 
 func inNumber(p *prettifier) stateFunc {
 	for {
-		p.debugState("inWordLower")
+		p.debugState("inNumber")
 		switch r := p.next(); {
+		case r == eof:
+			return nil
+		case r == '_':
+			p.backup()
+			p.emit(allLower)
+			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
 			p.emit(allLower)
