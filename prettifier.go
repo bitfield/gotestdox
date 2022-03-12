@@ -37,15 +37,16 @@ import (
 //
 // If the GOTESTDOX_DEBUG environment variable is set, Prettify will output
 // (copious) debug information to os.Stderr, elaborating on its decisions.
-func Prettify(tname string) string {
-	tname = strings.TrimPrefix(tname, "Test")
+func Prettify(input string) string {
+	trimmed := strings.TrimPrefix(input, "Test")
 	p := &prettifier{
-		input: []rune(tname),
+		input: []rune(trimmed),
 		words: []string{},
 	}
 	if os.Getenv("GOTESTDOX_DEBUG") != "" {
 		p.debug = os.Stderr
 	}
+	p.log("input", input)
 	for state := start; state != nil; {
 		state = state(p)
 	}
@@ -281,6 +282,11 @@ func inNumber(p *prettifier) stateFunc {
 		case r == '_':
 			p.backup()
 			p.emitLower()
+			return betweenWords
+		case r == '/':
+			p.backup()
+			p.emitLower()
+			p.inSubTest = true
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
