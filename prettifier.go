@@ -167,8 +167,13 @@ func betweenWords(p *prettifier) stateFunc {
 		switch r := p.next(); {
 		case r == '_':
 			p.skip()
+		case r == '/':
+			p.skip()
+			p.inSubTest = true
 		case unicode.IsUpper(r):
 			return inWordUpper
+		case unicode.IsLower(r):
+			return inWordLower
 			// case unicode.IsLower(r):
 			// 	p.emitRune(r)
 			// 	return inWordLower
@@ -194,7 +199,7 @@ func inInitialism(p *prettifier) stateFunc {
 			p.backup()
 			wordCase := allUpper
 			if (p.pos - p.start) == 1 {
-				wordCase = allLower
+				wordCase = allLower // don't capitalise single-letter words
 			}
 			p.emit(wordCase)
 			return inWordLower
@@ -288,6 +293,11 @@ func inWordLower(p *prettifier) stateFunc {
 			p.backup()
 			p.emit(allLower)
 			p.skip()
+			return betweenWords
+		case r == '/':
+			p.backup()
+			p.emit(allLower)
+			p.inSubTest = true
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()

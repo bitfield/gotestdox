@@ -114,11 +114,11 @@ var Cases = []struct {
 		input: "TestFooDoesAThing",
 		want:  "Foo does a thing",
 	},
-	// {
-	// 	name:  "renders subtest names without the slash, and with underscores replaced by spaces",
-	// 	input: "TestSliceSink/Empty_line_between_two_existing_lines",
-	// 	want:  "Slice sink empty line between two existing lines",
-	// },
+	{
+		name:  "renders subtest names without the slash, and with underscores replaced by spaces",
+		input: "TestSliceSink/Empty_line_between_two_existing_lines",
+		want:  "Slice sink empty line between two existing lines",
+	},
 	// {
 	// 	name:  "inserts a word break before subtest names beginning with a lowercase letter",
 	// 	input: "TestExec/go_help",
