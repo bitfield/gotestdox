@@ -210,9 +210,7 @@ func betweenWords(p *prettifier) stateFunc {
 		case r == '/':
 			p.skip()
 			p.inSubTest = true
-		case r == '-':
-			return inNumber
-		case unicode.IsLetter(r):
+		case r == '-', unicode.IsLetter(r):
 			return inWord
 		}
 	}
@@ -252,7 +250,7 @@ func inWord(p *prettifier) stateFunc {
 			if p.inInitialism() && (p.pos-p.start) > 1 {
 				p.backup()
 				p.emitUpper()
-				return inWord
+				continue
 			}
 			p.next()
 		case unicode.IsUpper(r):
@@ -264,36 +262,10 @@ func inWord(p *prettifier) stateFunc {
 			p.next()
 		case unicode.IsDigit(r):
 			p.backup()
-			if p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
+			if !unicode.IsDigit(p.prev()) && p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
 				p.emitLower()
 			}
-			return inNumber
-		}
-	}
-}
-
-func inNumber(p *prettifier) stateFunc {
-	for {
-		p.debugState("inNumber")
-		switch r := p.next(); {
-		case r == eof:
-			p.emitLower()
-			return nil
-		case r == '_':
-			p.backup()
-			p.emitLower()
-			return betweenWords
-		case r == '/':
-			p.backup()
-			p.emitLower()
-			p.inSubTest = true
-			return betweenWords
-		case unicode.IsUpper(r):
-			p.backup()
-			if !p.inInitialism() {
-				p.emitLower()
-			}
-			return inWord
+			p.next()
 		}
 	}
 }
