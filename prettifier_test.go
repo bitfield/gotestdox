@@ -119,21 +119,21 @@ var Cases = []struct {
 		input: "TestSliceSink/Empty_line_between_two_existing_lines",
 		want:  "Slice sink empty line between two existing lines",
 	},
-	// {
-	// 	name:  "inserts a word break before subtest names beginning with a lowercase letter",
-	// 	input: "TestExec/go_help",
-	// 	want:  "Exec go help",
-	// },
-	// {
-	// 	name:  "is okay with test names not in the form of a sentence",
-	// 	input: "TestMatch",
-	// 	want:  "Match",
-	// },
-	// {
-	// 	name:  "treats a single underscore as marking the end of a multiword function name",
-	// 	input: "TestFindFiles_WorksCorrectly",
-	// 	want:  "FindFiles works correctly",
-	// },
+	{
+		name:  "inserts a word break before subtest names beginning with a lowercase letter",
+		input: "TestExec/go_help",
+		want:  "Exec go help",
+	},
+	{
+		name:  "is okay with test names not in the form of a sentence",
+		input: "TestMatch",
+		want:  "Match",
+	},
+	{
+		name:  "treats a single underscore as marking the end of a multiword function name",
+		input: "TestFindFiles_WorksCorrectly",
+		want:  "FindFiles works correctly",
+	},
 	// {
 	// 	name:  "retains capitalisation of initialisms in a multiword function name",
 	// 	input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",

@@ -292,6 +292,10 @@ func inWordLower(p *prettifier) stateFunc {
 		case r == '_':
 			p.backup()
 			p.emit(allLower)
+			if !p.seenUnderscore && !p.inSubTest {
+				p.multiWordFunction()
+				return betweenWords
+			}
 			p.skip()
 			return betweenWords
 		case r == '/':
