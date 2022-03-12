@@ -189,29 +189,29 @@ var Cases = []struct {
 		input: "TestListObjectsVersionedFolders/Erasure-Test",
 		want:  "List objects versioned folders erasure-test",
 	},
-	// {
-	// 	name:  "keeps together digits in numbers that are standalone words",
-	// 	input: "TestLex11",
-	// 	want:  "Lex 11",
-	// },
-	// {
-	// 	name:  "handles a test with no name, but with subtests",
-	// 	input: "Test/default/issue12839",
-	// 	want:  "Default issue 12839",
-	// },
-	// {
-	// 	name:  "does not break words when a digit follows an = sign",
-	// 	input: "TestUniformFactorial/n=3",
-	// 	want:  "Uniform factorial n=3",
-	// },
-	// {
-	// 	name:  "preserves initialisms containing digits",
-	// 	input: "TestS390XOperandParser",
-	// 	want:  "S390X operand parser",
-	// },
-	// {
-	// 	name:  "preserves initialisms containing digits with two or more leading alpha characters",
-	// 	input: "TestBC35A",
-	// 	want:  "BC35A",
-	// },
+	{
+		name:  "keeps together digits in numbers that are standalone words",
+		input: "TestLex11",
+		want:  "Lex 11",
+	},
+	{
+		name:  "handles a test with no name, but with subtests",
+		input: "Test/default/issue12839",
+		want:  "Default issue 12839",
+	},
+	{
+		name:  "does not break words when a digit follows an = sign",
+		input: "TestUniformFactorial/n=3",
+		want:  "Uniform factorial n=3",
+	},
+	{
+		name:  "preserves initialisms containing digits",
+		input: "TestS390XOperandParser",
+		want:  "S390X operand parser",
+	},
+	{
+		name:  "preserves initialisms containing digits with two or more leading alpha characters",
+		input: "TestBC35A",
+		want:  "BC35A",
+	},
 }
