@@ -204,11 +204,11 @@ var Cases = []struct {
 		input: "TestUniformFactorial/n=3",
 		want:  "Uniform factorial n=3",
 	},
-	// {
-	// 	name:  "preserves initialisms containing digits",
-	// 	input: "TestS390XOperandParser",
-	// 	want:  "S390X operand parser",
-	// },
+	{
+		name:  "preserves initialisms containing digits",
+		input: "TestS390XOperandParser",
+		want:  "S390X operand parser",
+	},
 	// {
 	// 	name:  "preserves initialisms containing digits with two or more leading alpha characters",
 	// 	input: "TestBC35A",

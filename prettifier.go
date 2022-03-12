@@ -106,6 +106,15 @@ func (p *prettifier) inHyphenation() bool {
 	return false
 }
 
+func (p *prettifier) inInitialism() bool {
+	for _, r := range p.input[p.start:p.pos] {
+		if unicode.IsLower(r) {
+			return false
+		}
+	}
+	return true
+}
+
 func (p *prettifier) emit(c wordCase) {
 	word := string(p.input[p.start:p.pos])
 	if word == "" {
@@ -346,7 +355,7 @@ func inWordLower(p *prettifier) stateFunc {
 			return betweenWords
 		case unicode.IsDigit(r):
 			p.backup()
-			if p.prev() != '-' && p.prev() != '=' {
+			if p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
 				p.emit(allLower)
 			}
 			return inNumber
@@ -395,7 +404,9 @@ func inNumber(p *prettifier) stateFunc {
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
-			p.emit(allLower)
+			if !p.inInitialism() {
+				p.emit(allLower)
+			}
 			return inWordUpper
 			// 	case unicode.IsDigit(r):
 			// 		p.emitRune(r)
