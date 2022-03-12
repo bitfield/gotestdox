@@ -184,16 +184,11 @@ var Cases = []struct {
 		input: "TestReadExtended/nyc-taxi-data-100k.csv",
 		want:  "Read extended nyc-taxi-data-100k.csv",
 	},
-	// {
-	// 	name:  "keeps together hyphenated words with initial capitals",
-	// 	input: "TestListObjectsVersionedFolders/Erasure-Test",
-	// 	want:  "List objects versioned folders erasure-test",
-	// },
-	// {
-	// 	name:  "keeps together hyphenated words with initialisms",
-	// 	input: "TestListObjects/FS-Test71",
-	// 	want:  "List objects FS-test 71",
-	// },
+	{
+		name:  "keeps together hyphenated words with initial capitals",
+		input: "TestListObjectsVersionedFolders/Erasure-Test",
+		want:  "List objects versioned folders erasure-test",
+	},
 	// {
 	// 	name:  "keeps together digits in numbers that are standalone words",
 	// 	input: "TestLex11",

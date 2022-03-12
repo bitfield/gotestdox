@@ -97,6 +97,15 @@ func (p *prettifier) next() rune {
 	return next
 }
 
+func (p *prettifier) inHyphenation() bool {
+	for _, r := range p.input[p.start:p.pos] {
+		if r == '-' {
+			return true
+		}
+	}
+	return false
+}
+
 func (p *prettifier) emit(c wordCase) {
 	word := string(p.input[p.start:p.pos])
 	if word == "" {
@@ -217,6 +226,9 @@ func inInitialism(p *prettifier) stateFunc {
 			p.skip()
 			return betweenWords
 		case unicode.IsLower(r):
+			if p.inHyphenation() {
+				return inWordLower
+			}
 			p.backup()
 			p.backup()
 			wordCase := allUpper
@@ -324,7 +336,9 @@ func inWordLower(p *prettifier) stateFunc {
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
-			p.emit(allLower)
+			if p.prev() != '-' {
+				p.emit(allLower)
+			}
 			return betweenWords
 		case unicode.IsDigit(r):
 			p.backup()
