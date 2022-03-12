@@ -109,11 +109,11 @@ var Cases = []struct {
 		input: "Test_Foo__Works",
 		want:  "Foo works",
 	},
-	// {
-	// 	name:  "doesn't incorrectly title-case single-letter words",
-	// 	input: "TestFooDoesAThing",
-	// 	want:  "Foo does a thing",
-	// },
+	{
+		name:  "doesn't incorrectly title-case single-letter words",
+		input: "TestFooDoesAThing",
+		want:  "Foo does a thing",
+	},
 	// {
 	// 	name:  "renders subtest names without the slash, and with underscores replaced by spaces",
 	// 	input: "TestSliceSink/Empty_line_between_two_existing_lines",

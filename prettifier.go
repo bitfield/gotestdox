@@ -192,7 +192,11 @@ func inInitialism(p *prettifier) stateFunc {
 		case unicode.IsLower(r):
 			p.backup()
 			p.backup()
-			p.emit(allUpper)
+			wordCase := allUpper
+			if (p.pos - p.start) == 1 {
+				wordCase = allLower
+			}
+			p.emit(wordCase)
 			return inWordLower
 		case r == eof:
 			p.emit(allUpper)
