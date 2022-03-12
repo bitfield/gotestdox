@@ -82,11 +82,16 @@ func (p *prettifier) prev() rune {
 }
 
 func (p *prettifier) next() rune {
+	next := p.peek()
+	p.pos++
+	return next
+}
+
+func (p *prettifier) peek() rune {
 	if p.pos >= len(p.input) {
 		return eof
 	}
 	next := p.input[p.pos]
-	p.pos++
 	return next
 }
 
@@ -159,26 +164,22 @@ func betweenWords(p *prettifier) stateFunc {
 func inWord(p *prettifier) stateFunc {
 	for {
 		p.logState("inWord")
-		switch r := p.next(); {
+		switch r := p.peek(); {
 		case r == eof:
 			p.emit()
 			return nil
 		case r == '_':
-			p.backup()
 			p.emit()
 			if !p.seenUnderscore && !p.inSubTest {
 				// special 'end of function name' marker
 				p.multiWordFunction()
-				return betweenWords
 			}
 			return betweenWords
 		case r == '/':
-			p.backup()
 			p.emit()
 			p.inSubTest = true
 			return betweenWords
 		case unicode.IsUpper(r):
-			p.backup()
 			if p.prev() == '-' {
 				// inside hyphenated word
 				p.next()
@@ -192,7 +193,6 @@ func inWord(p *prettifier) stateFunc {
 			p.emit()
 			return betweenWords
 		case unicode.IsDigit(r):
-			p.backup()
 			if unicode.IsDigit(p.prev()) {
 				// in a multi-digit number
 				p.next()
@@ -215,7 +215,6 @@ func inWord(p *prettifier) stateFunc {
 			}
 			p.emit()
 		default:
-			p.backup()
 			if p.pos-p.start <= 1 {
 				// word too short
 				p.next()
@@ -231,6 +230,7 @@ func inWord(p *prettifier) stateFunc {
 				p.next()
 				continue
 			}
+			// start a new word
 			p.backup()
 			p.emit()
 		}
