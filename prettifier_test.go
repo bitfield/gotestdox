@@ -69,26 +69,26 @@ var Cases = []struct {
 		input: "TestFooGeneratesValidPDF",
 		want:  "Foo generates valid PDF",
 	},
-	// {
-	// 	name:  "preserves capitalisation of initialism when it is the first word",
-	// 	input: "TestJSONSucks",
-	// 	want:  "JSON sucks",
-	// },
-	// {
-	// 	name:  "preserves capitalisation of two-letter initialisms such as OK",
-	// 	input: "TestFilterReturnsOKIfThereAreNoTestFailures",
-	// 	want:  "Filter returns OK if there are no test failures",
-	// },
-	// {
-	// 	name:  "preserves longer all-caps words",
-	// 	input: "TestCategoryTrimsLEADINGSpacesFromValidCategory",
-	// 	want:  "Category trims LEADING spaces from valid category",
-	// },
-	// {
-	// 	name:  "treats numbers as word separators",
-	// 	input: "TestFooDoes8Things",
-	// 	want:  "Foo does 8 things",
-	// },
+	{
+		name:  "preserves capitalisation of initialism when it is the first word",
+		input: "TestJSONSucks",
+		want:  "JSON sucks",
+	},
+	{
+		name:  "preserves capitalisation of two-letter initialisms such as OK",
+		input: "TestFilterReturnsOKIfThereAreNoTestFailures",
+		want:  "Filter returns OK if there are no test failures",
+	},
+	{
+		name:  "preserves longer all-caps words",
+		input: "TestCategoryTrimsLEADINGSpacesFromValidCategory",
+		want:  "Category trims LEADING spaces from valid category",
+	},
+	{
+		name:  "treats numbers as word separators",
+		input: "TestFooDoes8Things",
+		want:  "Foo does 8 things",
+	},
 	// {
 	// 	name:  "knows that just Test is a valid test name",
 	// 	input: "Test",

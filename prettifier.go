@@ -274,6 +274,10 @@ func inWordLower(p *prettifier) stateFunc {
 			p.backup()
 			p.emit(allLower)
 			return betweenWords
+		case unicode.IsDigit(r):
+			p.backup()
+			p.emit(allLower)
+			return inNumber
 			// case unicode.IsUpper(r):
 			// 	if strings.HasSuffix(p.curWord, "-") {
 			// 		p.emitRune(r)
@@ -306,25 +310,27 @@ func inWordLower(p *prettifier) stateFunc {
 	}
 }
 
-// func inNumber(p *prettifier) stateFunc {
-// 	p.log("inNumber", p.curWord, string(r))
-// 	switch {
-// 	case unicode.IsDigit(r):
-// 		p.emitRune(r)
-// 		return inNumber
-// 	case unicode.IsUpper(r):
-// 		p.emitWord()
-// 		p.emitRune(r)
-// 		return inWordUpper
-// 	case r == '_':
-// 		p.emitWord()
-// 		return betweenWords
-// 	case r == '/':
-// 		p.inSubTest = true
-// 		p.emitWord()
-// 		return betweenWords
-// 	default:
-// 		p.emitRune(r)
-// 		return betweenWords
-// 	}
-// }
+func inNumber(p *prettifier) stateFunc {
+	for {
+		p.debugState("inWordLower")
+		switch r := p.next(); {
+		case unicode.IsUpper(r):
+			p.backup()
+			p.emit(allLower)
+			return inWordUpper
+			// 	case unicode.IsDigit(r):
+			// 		p.emitRune(r)
+			// 		return inNumber
+			// 	case r == '_':
+			// 		p.emitWord()
+			// 		return betweenWords
+			// 	case r == '/':
+			// 		p.inSubTest = true
+			// 		p.emitWord()
+			// 		return betweenWords
+			// 	default:
+			// 		p.emitRune(r)
+			// 		return betweenWords
+		}
+	}
+}
