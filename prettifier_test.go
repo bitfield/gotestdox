@@ -77,7 +77,7 @@ var Cases = []struct {
 		want:  "Sum correctly sums input numbers",
 	},
 	{
-		name:  "preserves capitalisation of initialisms such as PDF",
+		name:  "preserves capitalisation of initialisms such as 'PDF'",
 		input: "TestFooGeneratesValidPDFFile",
 		want:  "Foo generates valid PDF file",
 	},
@@ -92,7 +92,7 @@ var Cases = []struct {
 		want:  "JSON sucks",
 	},
 	{
-		name:  "preserves capitalisation of two-letter initialisms such as OK",
+		name:  "preserves capitalisation of two-letter initialisms such as 'OK'",
 		input: "TestFilterReturnsOKIfThereAreNoTestFailures",
 		want:  "Filter returns OK if there are no test failures",
 	},
@@ -112,7 +112,7 @@ var Cases = []struct {
 		want:  "Foo generates UTF8 correctly",
 	},
 	{
-		name:  "knows that just Test is a valid test name",
+		name:  "knows that just 'Test' is a valid test name",
 		input: "Test",
 		want:  "",
 	},
@@ -222,7 +222,7 @@ var Cases = []struct {
 		want:  "Default issue 12839",
 	},
 	{
-		name:  "does not break words when a digit follows an = sign",
+		name:  "does not break words when a digit follows an '=' sign",
 		input: "TestUniformFactorial/n=3",
 		want:  "Uniform factorial n=3",
 	},
