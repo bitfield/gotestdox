@@ -8,6 +8,8 @@ import (
 	"unicode"
 )
 
+const eof rune = 0
+
 var DebugWriter io.Writer = os.Stderr
 
 // Prettify takes a string representing the name of a Go test, and attempts to
@@ -43,6 +45,7 @@ func Prettify(input string) string {
 	p := &prettifier{
 		input: []rune(strings.TrimPrefix(input, "Test")),
 		words: []string{},
+		debug: io.Discard,
 	}
 	if os.Getenv("GOTESTDOX_DEBUG") != "" {
 		p.debug = DebugWriter
@@ -65,15 +68,6 @@ type prettifier struct {
 	inSubTest      bool
 	seenUnderscore bool
 }
-
-const eof rune = 0
-
-type wordCase int
-
-const (
-	allLower wordCase = iota
-	allUpper
-)
 
 func (p *prettifier) backup() {
 	p.pos--
@@ -105,29 +99,19 @@ func (p *prettifier) inInitialism() bool {
 	return true
 }
 
-func (p *prettifier) emit(c wordCase) {
+func (p *prettifier) emit() {
 	word := string(p.input[p.start:p.pos])
 	switch {
 	case len(p.words) == 0:
 		word = strings.Title(word)
 	case len(word) == 1:
 		word = strings.ToLower(word)
-	case c == allLower:
+	case !p.inInitialism():
 		word = strings.ToLower(word)
-	case c == allUpper:
-		word = strings.ToUpper(word)
 	}
 	p.log(fmt.Sprintf("emit %q", word))
 	p.words = append(p.words, word)
-	p.start = p.pos
-}
-
-func (p *prettifier) emitUpper() {
-	p.emit(allUpper)
-}
-
-func (p *prettifier) emitLower() {
-	p.emit(allLower)
+	p.skip()
 }
 
 func (p *prettifier) multiWordFunction() {
@@ -141,9 +125,6 @@ func (p *prettifier) multiWordFunction() {
 }
 
 func (p *prettifier) log(args ...interface{}) {
-	if p.debug == nil {
-		return
-	}
 	fmt.Fprintln(p.debug, args...)
 }
 
@@ -164,14 +145,11 @@ type stateFunc func(p *prettifier) stateFunc
 func betweenWords(p *prettifier) stateFunc {
 	for {
 		p.logState("betweenWords")
-		switch r := p.next(); {
-		case r == eof:
+		switch p.next() {
+		case eof:
 			return nil
-		case r == '_':
+		case '_', '/':
 			p.skip()
-		case r == '/':
-			p.skip()
-			p.inSubTest = true
 		default:
 			return inWord
 		}
@@ -183,48 +161,39 @@ func inWord(p *prettifier) stateFunc {
 		p.logState("inWord")
 		switch r := p.next(); {
 		case r == eof:
-			if p.inInitialism() {
-				p.emitUpper()
-			} else {
-				p.emitLower()
-			}
+			p.emit()
 			return nil
 		case r == '_':
 			p.backup()
-			if p.inInitialism() {
-				p.emitUpper()
-			} else {
-				p.emitLower()
-			}
+			p.emit()
 			if !p.seenUnderscore && !p.inSubTest {
 				p.multiWordFunction()
 				return betweenWords
 			}
-			p.skip()
 			return betweenWords
 		case r == '/':
 			p.backup()
-			p.emitLower()
+			p.emit()
 			p.inSubTest = true
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
 			if p.prev() != '-' && !p.inInitialism() {
-				p.emitLower()
+				p.emit()
 				return betweenWords
 			}
 			p.next()
 		case unicode.IsDigit(r):
 			p.backup()
 			if !unicode.IsDigit(p.prev()) && p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
-				p.emitLower()
+				p.emit()
 			}
 			p.next()
 		default:
 			p.backup()
 			if p.inInitialism() && (p.pos-p.start) > 1 {
 				p.backup()
-				p.emitUpper()
+				p.emit()
 				continue
 			}
 			p.next()
