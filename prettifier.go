@@ -85,9 +85,6 @@ func (p *prettifier) skip() {
 }
 
 func (p *prettifier) prev() rune {
-	if p.pos == 0 {
-		return p.input[0]
-	}
 	return p.input[p.pos-1]
 }
 
@@ -111,9 +108,6 @@ func (p *prettifier) inInitialism() bool {
 
 func (p *prettifier) emit(c wordCase) {
 	word := string(p.input[p.start:p.pos])
-	if word == "" {
-		return
-	}
 	switch {
 	case len(p.words) == 0:
 		word = strings.Title(word)
