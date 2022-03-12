@@ -1,3 +1,7 @@
+{"Time":"2022-03-12T12:40:29.833442Z","Action":"run","Package":"github.com/bitfield/gotestdox","Test":"ExampleTestDoxer_Filter"}
+{"Time":"2022-03-12T12:40:29.83345Z","Action":"output","Package":"github.com/bitfield/gotestdox","Test":"ExampleTestDoxer_Filter","Output":"=== RUN   ExampleTestDoxer_Filter\n"}
+{"Time":"2022-03-12T12:40:29.833459Z","Action":"output","Package":"github.com/bitfield/gotestdox","Test":"ExampleTestDoxer_Filter","Output":"--- PASS: ExampleTestDoxer_Filter (0.00s)\n"}
+{"Time":"2022-03-12T12:40:29.833467Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"ExampleTestDoxer_Filter","Elapsed":0}
 {"Time":"2022-03-05T11:33:08.166342Z","Action":"run","Package":"github.com/bitfield/gotestdox","Test":"TestSentence"}
 {"Time":"2022-03-05T11:33:08.166774Z","Action":"output","Package":"github.com/bitfield/gotestdox","Test":"TestSentence","Output":"=== RUN   TestSentence\n"}
 {"Time":"2022-03-05T11:33:08.166801Z","Action":"output","Package":"github.com/bitfield/gotestdox","Test":"TestSentence","Output":"=== PAUSE TestSentence\n"}

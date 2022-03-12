@@ -1,6 +1,7 @@
 package gotestdox_test
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -18,6 +19,22 @@ func TestPrettify(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPrettifierLogsToDebugWriter(t *testing.T) {
+	// can't run in parallel because we set DebugWriter
+	// and GOTESTDOX_DEBUG
+	buf := &bytes.Buffer{}
+	origWriter := gotestdox.DebugWriter
+	gotestdox.DebugWriter = buf
+	t.Setenv("GOTESTDOX_DEBUG", "1")
+	gotestdox.Prettify("a")
+	want := "input: a\nbetweenWords: [] -> a\ninWord: [a] -> EOF\nemit \"A\"\nresult: [A] \n\n"
+	got := buf.String()
+	if want != got {
+		t.Error(cmp.Diff(want, got))
+	}
+	gotestdox.DebugWriter = origWriter
 }
 
 func BenchmarkPrettify(b *testing.B) {
@@ -45,7 +62,17 @@ var Cases = []struct {
 	name, input, want string
 }{
 	{
-		name:  "correctly renders a well-formed test name",
+		name:  "accepts a single-letter test name",
+		input: "TestS",
+		want:  "S",
+	},
+	{
+		name:  "accepts a single-word test name",
+		input: "TestSum",
+		want:  "Sum",
+	},
+	{
+		name:  "replaces camel-case transitions with spaces",
 		input: "TestSumCorrectlySumsInputNumbers",
 		want:  "Sum correctly sums input numbers",
 	},
@@ -53,6 +80,11 @@ var Cases = []struct {
 		name:  "preserves capitalisation of initialisms such as PDF",
 		input: "TestFooGeneratesValidPDFFile",
 		want:  "Foo generates valid PDF file",
+	},
+	{
+		name:  "does not hang when name ends with initialism",
+		input: "TestFooGeneratesValidPDF",
+		want:  "Foo generates valid PDF",
 	},
 	{
 		name:  "preserves capitalisation of initialism when it is the first word",
@@ -73,6 +105,11 @@ var Cases = []struct {
 		name:  "treats numbers as word separators",
 		input: "TestFooDoes8Things",
 		want:  "Foo does 8 things",
+	},
+	{
+		name:  "keeps a trailing digit as part of an initialism",
+		input: "TestFooGeneratesUTF8Correctly",
+		want:  "Foo generates UTF8 correctly",
 	},
 	{
 		name:  "knows that just Test is a valid test name",
@@ -150,14 +187,14 @@ var Cases = []struct {
 		want:  "Foo does what's required",
 	},
 	{
+		name:  "retains quoted words as quoted",
+		input: "TestFoo/handles_'Bar'_correctly",
+		want:  "Foo handles 'bar' correctly",
+	},
+	{
 		name:  "does not erase the final digit in words that end with a digit",
 		input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
 		want:  "Extract files truncated bzip 2 which will return an error",
-	},
-	{
-		name:  "keeps a trailing digit as part of an initialism",
-		input: "TestExtractFiles/Truncated_BZIP2_which_will_return_an_error",
-		want:  "Extract files truncated BZIP2 which will return an error",
 	},
 	{
 		name:  "recognises a dash followed by a digit as a negative number",
@@ -173,11 +210,6 @@ var Cases = []struct {
 		name:  "keeps together hyphenated words with initial capitals",
 		input: "TestListObjectsVersionedFolders/Erasure-Test",
 		want:  "List objects versioned folders erasure-test",
-	},
-	{
-		name:  "keeps together hyphenated words with initialisms",
-		input: "TestListObjects/FS-Test71",
-		want:  "List objects FS-test 71",
 	},
 	{
 		name:  "keeps together digits in numbers that are standalone words",

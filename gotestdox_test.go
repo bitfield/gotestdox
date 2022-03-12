@@ -1,6 +1,7 @@
 package gotestdox_test
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -155,6 +156,44 @@ func TestFilterSetsOKToFalseIfAnyTestFails(t *testing.T) {
 	td.Filter()
 	if td.OK {
 		t.Error("got OK")
+	}
+}
+
+func TestFilterSkipsIrrelevantEvents(t *testing.T) {
+	t.Parallel()
+	data, err := os.Open("testdata/passing_tests.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer data.Close()
+	buf := &bytes.Buffer{}
+	td := gotestdox.TestDoxer{
+		Stdin:  data,
+		Stdout: buf,
+		Stderr: io.Discard,
+	}
+	td.Filter()
+	if strings.Contains(buf.String(), "Example") {
+		t.Error("irrelevant event (Example)")
+	}
+}
+
+func TestFilterKeepsTrackOfCurrentPackage(t *testing.T) {
+	t.Parallel()
+	data, err := os.Open("testdata/packages.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer data.Close()
+	buf := &bytes.Buffer{}
+	td := gotestdox.TestDoxer{
+		Stdin:  data,
+		Stdout: buf,
+		Stderr: io.Discard,
+	}
+	td.Filter()
+	if strings.Count(buf.String(), "a:") > 1 {
+		t.Error("want package a to be shown only once")
 	}
 }
 

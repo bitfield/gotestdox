@@ -8,6 +8,10 @@ import (
 	"unicode"
 )
 
+const eof rune = 0
+
+var DebugWriter io.Writer = os.Stderr
+
 // Prettify takes a string representing the name of a Go test, and attempts to
 // turn it into a readable sentence, by replacing camel-case transitions and
 // underscores with spaces.
@@ -37,47 +41,77 @@ import (
 //
 // If the GOTESTDOX_DEBUG environment variable is set, Prettify will output
 // (copious) debug information to os.Stderr, elaborating on its decisions.
-func Prettify(tname string) string {
-	tname = strings.TrimPrefix(tname, "Test")
+func Prettify(input string) string {
 	p := &prettifier{
+		input: []rune(strings.TrimPrefix(input, "Test")),
 		words: []string{},
+		debug: io.Discard,
 	}
 	if os.Getenv("GOTESTDOX_DEBUG") != "" {
-		p.debug = os.Stderr
+		p.debug = DebugWriter
 	}
-	state := start
-	for _, r := range tname {
-		state = state(p, r)
+	p.log("input:", input)
+	for state := betweenWords; state != nil; {
+		state = state(p)
 	}
-	p.emitWord()
-	if len(p.words) > 0 {
-		p.words[0] = strings.Title(p.words[0])
-	}
-	p.log(fmt.Sprintf("%#v\n", p.words))
+	p.log("result:", p.words, "\n")
 	return strings.Join(p.words, " ")
 }
 
-// This lexer implementation owes a lot, if not everything, to Rob Pike's talk
-// on 'Lexical Scanning in Go': https://www.youtube.com/watch?v=HxaD_trXwRE
+// Heavily inspired by Rob Pike's talk on 'Lexical Scanning in Go':
+// https://www.youtube.com/watch?v=HxaD_trXwRE
 type prettifier struct {
 	debug          io.Writer
-	curWord        string
+	input          []rune
+	start, pos     int
 	words          []string
 	inSubTest      bool
 	seenUnderscore bool
 }
 
-func (p *prettifier) emitRune(r rune) {
-	p.curWord += string(r)
+func (p *prettifier) backup() {
+	p.pos--
 }
 
-func (p *prettifier) emitWord() {
-	if p.curWord == "" {
-		return
+func (p *prettifier) skip() {
+	p.start = p.pos
+}
+
+func (p *prettifier) prev() rune {
+	return p.input[p.pos-1]
+}
+
+func (p *prettifier) next() rune {
+	if p.pos >= len(p.input) {
+		return eof
 	}
-	p.log("emit", p.curWord)
-	p.words = append(p.words, p.curWord)
-	p.curWord = ""
+	next := p.input[p.pos]
+	p.pos++
+	return next
+}
+
+func (p *prettifier) inInitialism() bool {
+	for _, r := range p.input[p.start:p.pos] {
+		if unicode.IsLower(r) {
+			return false
+		}
+	}
+	return true
+}
+
+func (p *prettifier) emit() {
+	word := string(p.input[p.start:p.pos])
+	switch {
+	case len(p.words) == 0:
+		word = strings.Title(word)
+	case len(word) == 1:
+		word = strings.ToLower(word)
+	case !p.inInitialism():
+		word = strings.ToLower(word)
+	}
+	p.log(fmt.Sprintf("emit %q", word))
+	p.words = append(p.words, word)
+	p.skip()
 }
 
 func (p *prettifier) multiWordFunction() {
@@ -87,175 +121,118 @@ func (p *prettifier) multiWordFunction() {
 	}
 	p.log("multiword function", fname)
 	p.words = []string{fname}
+	p.seenUnderscore = true
 }
 
 func (p *prettifier) log(args ...interface{}) {
-	if p.debug != nil {
-		fmt.Fprintln(p.debug, args...)
+	fmt.Fprintln(p.debug, args...)
+}
+
+func (p *prettifier) logState(stateName string) {
+	next := "EOF"
+	if p.pos < len(p.input) {
+		next = string(p.input[p.pos])
+	}
+	p.log(fmt.Sprintf("%s: [%s] -> %s",
+		stateName,
+		string(p.input[p.start:p.pos]),
+		next,
+	))
+}
+
+type stateFunc func(p *prettifier) stateFunc
+
+func betweenWords(p *prettifier) stateFunc {
+	for {
+		p.logState("betweenWords")
+		switch p.next() {
+		case eof:
+			return nil
+		case '_', '/':
+			p.skip()
+		default:
+			return inWord
+		}
 	}
 }
 
-type stateFunc func(p *prettifier, r rune) stateFunc
-
-func start(p *prettifier, r rune) stateFunc {
-	p.log("start", string(r))
-	switch {
-	case unicode.IsUpper(r):
-		p.emitRune(r)
-		return inWordUpper
-	case r == '/':
-		p.inSubTest = true
-		return betweenWords
-	default:
-		return start
-	}
-}
-
-func betweenWords(p *prettifier, r rune) stateFunc {
-	p.log("betweenWords", p.curWord, string(r))
-	switch {
-	case unicode.IsUpper(r):
-		p.emitRune(r)
-		return inWordUpper
-	case unicode.IsLower(r):
-		p.emitRune(r)
-		return inWordLower
-	case r == '_':
-		p.seenUnderscore = true
-		return betweenWords
-	case r == '/':
-		p.inSubTest = true
-		return betweenWords
-	default:
-		p.emitRune(r)
-		return inWordLower
-	}
-}
-
-func inInitialism(p *prettifier, r rune) stateFunc {
-	p.log("inInitialism", p.curWord, string(r))
-	switch {
-	case unicode.IsLower(r):
-		// If we see a lowercase rune, it means we're already one rune
-		// into the next word. We need to emit the previous word, and
-		// reset the current word to be just the previous rune, before
-		// adding the current rune to it.
-		prev := p.curWord[:len(p.curWord)-1]
-		if len(prev) == 1 {
-			prev = strings.ToLower(prev)
+func inWord(p *prettifier) stateFunc {
+	for {
+		p.logState("inWord")
+		switch r := p.next(); {
+		case r == eof:
+			p.emit()
+			return nil
+		case r == '_':
+			p.backup()
+			p.emit()
+			if !p.seenUnderscore && !p.inSubTest {
+				// special 'end of function name' marker
+				p.multiWordFunction()
+				return betweenWords
+			}
+			return betweenWords
+		case r == '/':
+			p.backup()
+			p.emit()
+			p.inSubTest = true
+			return betweenWords
+		case unicode.IsUpper(r):
+			p.backup()
+			if p.prev() == '-' {
+				// inside hyphenated word
+				p.next()
+				continue
+			}
+			if p.inInitialism() {
+				// keep going
+				p.next()
+				continue
+			}
+			p.emit()
+			return betweenWords
+		case unicode.IsDigit(r):
+			p.backup()
+			if unicode.IsDigit(p.prev()) {
+				// in a multi-digit number
+				p.next()
+				continue
+			}
+			if p.prev() == '-' {
+				// in a negative number
+				p.next()
+				continue
+			}
+			if p.prev() == '=' {
+				// in some phrase like 'n=3'
+				p.next()
+				continue
+			}
+			if p.inInitialism() {
+				// keep going
+				p.next()
+				continue
+			}
+			p.emit()
+		default:
+			p.backup()
+			if p.pos-p.start <= 1 {
+				// word too short
+				p.next()
+				continue
+			}
+			if p.input[p.start] == '\'' {
+				// inside a quoted word
+				p.next()
+				continue
+			}
+			if !p.inInitialism() {
+				// keep going
+				p.next()
+				continue
+			}
+			p.backup()
+			p.emit()
 		}
-		p.log("emit", prev)
-		p.words = append(p.words, prev)
-		p.curWord = strings.ToLower(string(p.curWord[len(p.curWord)-1]))
-		p.emitRune(r)
-		return inWordLower
-	case unicode.IsUpper(r):
-		// A hyphen marks the end of an initialism
-		if strings.Contains(p.curWord, "-") {
-			p.emitRune(unicode.ToLower(r))
-			return inWordLower
-		}
-		p.emitRune(r)
-		return inInitialism
-	case r == '_':
-		p.emitWord()
-		// If this is the first underscore we've seen, and we're not yet
-		// in a subtest name, then treat all the words we've seen so far
-		// as making up the name of a multiword function ('HandleInput')
-		if !p.seenUnderscore && !p.inSubTest {
-			p.multiWordFunction()
-			p.seenUnderscore = true
-		}
-		return inWordLower
-	case r == '/':
-		// We're entering a subtest name, so from now on the multiword
-		// function rule will be disabled
-		p.inSubTest = true
-		p.emitWord()
-		return betweenWords
-	default:
-		p.emitRune(r)
-		return inInitialism
-	}
-}
-
-func inWordUpper(p *prettifier, r rune) stateFunc {
-	p.log("inWordUpper", p.curWord, string(r))
-	switch {
-	case unicode.IsUpper(r), unicode.IsDigit(r):
-		p.emitRune(r)
-		return inInitialism
-	case r == '_':
-		p.emitWord()
-		if !p.seenUnderscore && !p.inSubTest {
-			p.multiWordFunction()
-			p.seenUnderscore = true
-		}
-		return inWordLower
-	case r == '/':
-		p.inSubTest = true
-		p.emitWord()
-		return betweenWords
-	default:
-		p.curWord = strings.ToLower(p.curWord)
-		p.emitRune(r)
-		return inWordLower
-	}
-}
-
-func inWordLower(p *prettifier, r rune) stateFunc {
-	p.log("inWordLower", p.curWord, string(r))
-	switch {
-	case unicode.IsUpper(r):
-		if strings.HasSuffix(p.curWord, "-") {
-			p.emitRune(r)
-			return inWordUpper
-		}
-		p.emitWord()
-		p.emitRune(r)
-		return inWordUpper
-	case unicode.IsDigit(r):
-		if !strings.HasSuffix(p.curWord, "-") && !strings.HasSuffix(p.curWord, "=") {
-			p.emitWord()
-		}
-		p.emitRune(r)
-		return inNumber
-	case r == '_':
-		p.emitWord()
-		if !p.seenUnderscore && !p.inSubTest {
-			p.multiWordFunction()
-			p.seenUnderscore = true
-		}
-		return inWordLower
-	case r == '/':
-		p.inSubTest = true
-		p.emitWord()
-		return betweenWords
-	default:
-		p.emitRune(r)
-		return inWordLower
-	}
-}
-
-func inNumber(p *prettifier, r rune) stateFunc {
-	p.log("inNumber", p.curWord, string(r))
-	switch {
-	case unicode.IsDigit(r):
-		p.emitRune(r)
-		return inNumber
-	case unicode.IsUpper(r):
-		p.emitWord()
-		p.emitRune(r)
-		return inWordUpper
-	case r == '_':
-		p.emitWord()
-		return betweenWords
-	case r == '/':
-		p.inSubTest = true
-		p.emitWord()
-		return betweenWords
-	default:
-		p.emitRune(r)
-		return betweenWords
 	}
 }
