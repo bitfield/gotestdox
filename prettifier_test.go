@@ -179,11 +179,11 @@ var Cases = []struct {
 		input: "TestColumnSelects/column_-1_of_input",
 		want:  "Column selects column -1 of input",
 	},
-	// {
-	// 	name:  "keeps numbers within a hyphenated word",
-	// 	input: "TestReadExtended/nyc-taxi-data-100k.csv",
-	// 	want:  "Read extended nyc-taxi-data-100k.csv",
-	// },
+	{
+		name:  "keeps numbers within a hyphenated word",
+		input: "TestReadExtended/nyc-taxi-data-100k.csv",
+		want:  "Read extended nyc-taxi-data-100k.csv",
+	},
 	// {
 	// 	name:  "keeps together hyphenated words with initial capitals",
 	// 	input: "TestListObjectsVersionedFolders/Erasure-Test",

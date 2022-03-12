@@ -81,6 +81,13 @@ func (p *prettifier) skip() {
 	p.start = p.pos
 }
 
+func (p *prettifier) prev() rune {
+	if p.pos == 0 {
+		return p.input[0]
+	}
+	return p.input[p.pos-1]
+}
+
 func (p *prettifier) next() rune {
 	if p.pos >= len(p.input) {
 		return eof
@@ -321,7 +328,9 @@ func inWordLower(p *prettifier) stateFunc {
 			return betweenWords
 		case unicode.IsDigit(r):
 			p.backup()
-			p.emit(allLower)
+			if p.prev() != '-' {
+				p.emit(allLower)
+			}
 			return inNumber
 			// case unicode.IsUpper(r):
 			// 	if strings.HasSuffix(p.curWord, "-") {
@@ -360,6 +369,7 @@ func inNumber(p *prettifier) stateFunc {
 		p.debugState("inNumber")
 		switch r := p.next(); {
 		case r == eof:
+			p.emit(allLower)
 			return nil
 		case r == '_':
 			p.backup()
