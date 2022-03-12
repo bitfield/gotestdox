@@ -180,7 +180,7 @@ func start(p *prettifier) stateFunc {
 		case r == eof:
 			return nil
 		case unicode.IsUpper(r):
-			return inWordUpper
+			return inWord
 		// case r == '/':
 		// 	p.inSubTest = true
 		// 	return betweenWords
@@ -203,9 +203,9 @@ func betweenWords(p *prettifier) stateFunc {
 		case r == '-':
 			return inNumber
 		case unicode.IsUpper(r):
-			return inWordUpper
+			return inWord
 		case unicode.IsLower(r):
-			return inWordLower
+			return inWord
 			// case unicode.IsLower(r):
 			// 	p.emitRune(r)
 			// 	return inWordLower
@@ -222,113 +222,9 @@ func betweenWords(p *prettifier) stateFunc {
 	}
 }
 
-func inInitialism(p *prettifier) stateFunc {
+func inWord(p *prettifier) stateFunc {
 	for {
-		p.debugState("inInitialism")
-		switch r := p.next(); {
-		case r == eof:
-			p.emit(allUpper)
-			return nil
-		case r == '_':
-			p.backup()
-			p.emit(allUpper)
-			if !p.seenUnderscore && !p.inSubTest {
-				p.multiWordFunction()
-				return betweenWords
-			}
-			p.skip()
-			return betweenWords
-		case unicode.IsLower(r):
-			if p.inHyphenation() {
-				return inWordLower
-			}
-			p.backup()
-			p.backup()
-			wordCase := allUpper
-			if (p.pos - p.start) == 1 {
-				wordCase = allLower // don't capitalise single-letter words
-			}
-			p.emit(wordCase)
-			return inWordLower
-			// case unicode.IsLower(r):
-			// 	// If we see a lowercase rune, it means we're already one rune
-			// 	// into the next word. We need to emit the previous word, and
-			// 	// reset the current word to be just the previous rune, before
-			// 	// adding the current rune to it.
-			// 	prev := p.curWord[:len(p.curWord)-1]
-			// 	if len(prev) == 1 {
-			// 		prev = strings.ToLower(prev)
-			// 	}
-			// 	p.log("emit", prev)
-			// 	p.words = append(p.words, prev)
-			// 	p.curWord = strings.ToLower(string(p.curWord[len(p.curWord)-1]))
-			// 	p.emitRune(r)
-			// 	return inWordLower
-			// case unicode.IsUpper(r):
-			// 	// A hyphen marks the end of an initialism
-			// 	if strings.Contains(p.curWord, "-") {
-			// 		p.emitRune(unicode.ToLower(r))
-			// 		return inWordLower
-			// 	}
-			// 	p.emitRune(r)
-			// 	return inInitialism
-			// case r == '_':
-			// 	p.emitWord()
-			// 	// If this is the first underscore we've seen, and we're not yet
-			// 	// in a subtest name, then treat all the words we've seen so far
-			// 	// as making up the name of a multiword function ('HandleInput')
-			// 	if !p.seenUnderscore && !p.inSubTest {
-			// 		p.multiWordFunction()
-			// 		p.seenUnderscore = true
-			// 	}
-			// 	return inWordLower
-			// case r == '/':
-			// 	// We're entering a subtest name, so from now on the multiword
-			// 	// function rule will be disabled
-			// 	p.inSubTest = true
-			// 	p.emitWord()
-			// 	return betweenWords
-			// default:
-			// 	p.emitRune(r)
-			// 	return inInitialism
-			// }
-		}
-	}
-}
-
-func inWordUpper(p *prettifier) stateFunc {
-	p.debugState("inWordUpper")
-	switch r := p.next(); {
-	case r == eof:
-		p.emit(allLower)
-		return nil
-	case unicode.IsUpper(r):
-		return inInitialism
-	// case unicode.IsUpper(r), unicode.IsDigit(r):
-	// 	p.pos++
-	// 	return inInitialism
-	// case r == '_':
-	// 	p.emitWord()
-	// 	if !p.seenUnderscore && !p.inSubTest {
-	// 		p.multiWordFunction()
-	// 		p.seenUnderscore = true
-	// 	}
-	// 	return inWordLower
-	// case r == '/':
-	// 	p.inSubTest = true
-	// 	p.emitWord()
-	// 	return betweenWords
-	default:
-		return inWordLower
-		// 	p.curWord = strings.ToLower(p.curWord)
-		// 	p.emitRune(r)
-		// 	return inWordLower
-	}
-}
-
-func inWordLower(p *prettifier) stateFunc {
-	for {
-		p.debugState("inWordLower")
+		p.debugState("inWord")
 		switch r := p.next(); {
 		case r == eof:
 			p.emit(allLower)
@@ -347,12 +243,20 @@ func inWordLower(p *prettifier) stateFunc {
 			p.emit(allLower)
 			p.inSubTest = true
 			return betweenWords
-		case unicode.IsUpper(r):
+		case unicode.IsLower(r):
 			p.backup()
-			if p.prev() != '-' {
-				p.emit(allLower)
+			if p.inInitialism() && (p.pos-p.start) > 1 {
+				p.backup()
+				p.emit(allUpper)
+				return inWord
 			}
-			return betweenWords
+			p.next()
+		case unicode.IsUpper(r):
+			if p.prev() != '-' && !p.inInitialism() {
+				p.backup()
+				p.emit(allLower)
+				return betweenWords
+			}
 		case unicode.IsDigit(r):
 			p.backup()
 			if p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
@@ -407,7 +311,7 @@ func inNumber(p *prettifier) stateFunc {
 			if !p.inInitialism() {
 				p.emit(allLower)
 			}
-			return inWordUpper
+			return inWord
 			// 	case unicode.IsDigit(r):
 			// 		p.emitRune(r)
 			// 		return inNumber
