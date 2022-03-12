@@ -192,6 +192,11 @@ var Cases = []struct {
 		want:  "Foo does what's required",
 	},
 	{
+		name:  "retains quoted words as quoted",
+		input: "TestFoo/handles_'Bar'_correctly",
+		want:  "Foo handles 'bar' correctly",
+	},
+	{
 		name:  "does not erase the final digit in words that end with a digit",
 		input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
 		want:  "Extract files truncated bzip 2 which will return an error",

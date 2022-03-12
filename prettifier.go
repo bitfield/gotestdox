@@ -167,6 +167,7 @@ func inWord(p *prettifier) stateFunc {
 			p.backup()
 			p.emit()
 			if !p.seenUnderscore && !p.inSubTest {
+				// special 'end of function name' marker
 				p.multiWordFunction()
 				return betweenWords
 			}
@@ -178,25 +179,60 @@ func inWord(p *prettifier) stateFunc {
 			return betweenWords
 		case unicode.IsUpper(r):
 			p.backup()
-			if p.prev() != '-' && !p.inInitialism() {
-				p.emit()
-				return betweenWords
-			}
-			p.next()
-		case unicode.IsDigit(r):
-			p.backup()
-			if !unicode.IsDigit(p.prev()) && p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
-				p.emit()
-			}
-			p.next()
-		default:
-			p.backup()
-			if p.inInitialism() && (p.pos-p.start) > 1 {
-				p.backup()
-				p.emit()
+			if p.prev() == '-' {
+				// inside hyphenated word
+				p.next()
 				continue
 			}
-			p.next()
+			if p.inInitialism() {
+				// keep going
+				p.next()
+				continue
+			}
+			p.emit()
+			return betweenWords
+		case unicode.IsDigit(r):
+			p.backup()
+			if unicode.IsDigit(p.prev()) {
+				// in a multi-digit number
+				p.next()
+				continue
+			}
+			if p.prev() == '-' {
+				// in a negative number
+				p.next()
+				continue
+			}
+			if p.prev() == '=' {
+				// in some phrase like 'n=3'
+				p.next()
+				continue
+			}
+			if p.inInitialism() {
+				// keep going
+				p.next()
+				continue
+			}
+			p.emit()
+		default:
+			p.backup()
+			if p.pos-p.start <= 1 {
+				// word too short
+				p.next()
+				continue
+			}
+			if p.input[p.start] == '\'' {
+				// inside a quoted word
+				p.next()
+				continue
+			}
+			if !p.inInitialism() {
+				// keep going
+				p.next()
+				continue
+			}
+			p.backup()
+			p.emit()
 		}
 	}
 }
