@@ -346,7 +346,7 @@ func inWordLower(p *prettifier) stateFunc {
 			return betweenWords
 		case unicode.IsDigit(r):
 			p.backup()
-			if p.prev() != '-' {
+			if p.prev() != '-' && p.prev() != '=' {
 				p.emit(allLower)
 			}
 			return inNumber

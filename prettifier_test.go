@@ -199,11 +199,11 @@ var Cases = []struct {
 		input: "Test/default/issue12839",
 		want:  "Default issue 12839",
 	},
-	// {
-	// 	name:  "does not break words when a digit follows an = sign",
-	// 	input: "TestUniformFactorial/n=3",
-	// 	want:  "Uniform factorial n=3",
-	// },
+	{
+		name:  "does not break words when a digit follows an = sign",
+		input: "TestUniformFactorial/n=3",
+		want:  "Uniform factorial n=3",
+	},
 	// {
 	// 	name:  "preserves initialisms containing digits",
 	// 	input: "TestS390XOperandParser",
