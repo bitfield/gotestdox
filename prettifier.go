@@ -184,6 +184,9 @@ func inInitialism(p *prettifier) stateFunc {
 			p.backup()
 			p.emit(allUpper)
 			return inWordLower
+		case r == eof:
+			p.emit(allUpper)
+			return nil
 			// case unicode.IsLower(r):
 			// 	// If we see a lowercase rune, it means we're already one rune
 			// 	// into the next word. We need to emit the previous word, and
