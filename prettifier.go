@@ -47,7 +47,7 @@ func Prettify(input string) string {
 		p.debug = os.Stderr
 	}
 	p.log("input", input)
-	for state := start; state != nil; {
+	for state := betweenWords; state != nil; {
 		state = state(p)
 	}
 	p.log(fmt.Sprintf("%#v\n", p.words))
@@ -177,27 +177,6 @@ func (p *prettifier) debugState(stateName string) {
 }
 
 type stateFunc func(p *prettifier) stateFunc
-
-func start(p *prettifier) stateFunc {
-	for {
-		p.debugState("start")
-		switch r := p.next(); {
-		case r == '_':
-			p.skip()
-		case r == '/':
-			p.skip()
-			p.inSubTest = true
-			return betweenWords
-		case r == eof:
-			return nil
-		case unicode.IsUpper(r):
-			return inWord
-		default:
-			p.pos++
-			return start
-		}
-	}
-}
 
 func betweenWords(p *prettifier) stateFunc {
 	for {
