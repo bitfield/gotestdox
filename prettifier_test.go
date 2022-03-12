@@ -139,56 +139,56 @@ var Cases = []struct {
 		input: "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine",
 		want:  "ParseJSON correctly parses a single go test JSON output line",
 	},
-	// {
-	// 	name:  "treats a single underscore before the first slash as marking the end of a multiword function name",
-	// 	input: "TestFindFiles_/WorksCorrectly",
-	// 	want:  "FindFiles works correctly",
-	// },
-	// {
-	// 	name:  "handles multiple underscores, with the first marking the end of a multiword function name",
-	// 	input: "TestFindFiles_Does_Stuff",
-	// 	want:  "FindFiles does stuff",
-	// },
-	// {
-	// 	name:  "does not treat an underscore in a subtest name as marking the end of a multiword function name",
-	// 	input: "TestCallingTheFunction/Does_Stuff",
-	// 	want:  "Calling the function does stuff",
-	// },
-	// {
-	// 	name:  "eliminates any words containing underscores after splitting",
-	// 	input: "TestSentence/does_x,_correctly",
-	// 	want:  "Sentence does x, correctly",
-	// },
-	// {
-	// 	name:  "retains hyphenated words in their original form",
-	// 	input: "TestFoo/has_well-formed_output",
-	// 	want:  "Foo has well-formed output",
-	// },
-	// {
-	// 	name:  "retains apostrophised words in their original form",
-	// 	input: "TestFoo/does_what's_required",
-	// 	want:  "Foo does what's required",
-	// },
-	// {
-	// 	name:  "does not erase the final digit in words that end with a digit",
-	// 	input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
-	// 	want:  "Extract files truncated bzip 2 which will return an error",
-	// },
-	// {
-	// 	name:  "recognises a dash followed by a digit as a negative number",
-	// 	input: "TestColumnSelects/column_-1_of_input",
-	// 	want:  "Column selects column -1 of input",
-	// },
-	// {
-	// 	name:  "keeps numbers within a hyphenated word",
-	// 	input: "TestReadExtended/nyc-taxi-data-100k.csv",
-	// 	want:  "Read extended nyc-taxi-data-100k.csv",
-	// },
-	// {
-	// 	name:  "keeps together hyphenated words with initial capitals",
-	// 	input: "TestListObjectsVersionedFolders/Erasure-Test",
-	// 	want:  "List objects versioned folders erasure-test",
-	// },
+	{
+		name:  "treats a single underscore before the first slash as marking the end of a multiword function name",
+		input: "TestFindFiles_/WorksCorrectly",
+		want:  "FindFiles works correctly",
+	},
+	{
+		name:  "handles multiple underscores, with the first marking the end of a multiword function name",
+		input: "TestFindFiles_Does_Stuff",
+		want:  "FindFiles does stuff",
+	},
+	{
+		name:  "does not treat an underscore in a subtest name as marking the end of a multiword function name",
+		input: "TestCallingTheFunction/Does_Stuff",
+		want:  "Calling the function does stuff",
+	},
+	{
+		name:  "eliminates any words containing underscores after splitting",
+		input: "TestSentence/does_x,_correctly",
+		want:  "Sentence does x, correctly",
+	},
+	{
+		name:  "retains hyphenated words in their original form",
+		input: "TestFoo/has_well-formed_output",
+		want:  "Foo has well-formed output",
+	},
+	{
+		name:  "retains apostrophised words in their original form",
+		input: "TestFoo/does_what's_required",
+		want:  "Foo does what's required",
+	},
+	{
+		name:  "does not erase the final digit in words that end with a digit",
+		input: "TestExtractFiles/Truncated_bzip2_which_will_return_an_error",
+		want:  "Extract files truncated bzip 2 which will return an error",
+	},
+	{
+		name:  "recognises a dash followed by a digit as a negative number",
+		input: "TestColumnSelects/column_-1_of_input",
+		want:  "Column selects column -1 of input",
+	},
+	{
+		name:  "keeps numbers within a hyphenated word",
+		input: "TestReadExtended/nyc-taxi-data-100k.csv",
+		want:  "Read extended nyc-taxi-data-100k.csv",
+	},
+	{
+		name:  "keeps together hyphenated words with initial capitals",
+		input: "TestListObjectsVersionedFolders/Erasure-Test",
+		want:  "List objects versioned folders erasure-test",
+	},
 	// {
 	// 	name:  "keeps together digits in numbers that are standalone words",
 	// 	input: "TestLex11",

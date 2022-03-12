@@ -253,11 +253,12 @@ func inWord(p *prettifier) stateFunc {
 			}
 			p.next()
 		case unicode.IsUpper(r):
+			p.backup()
 			if p.prev() != '-' && !p.inInitialism() {
-				p.backup()
 				p.emitLower()
 				return betweenWords
 			}
+			p.next()
 		case unicode.IsDigit(r):
 			p.backup()
 			if p.prev() != '-' && p.prev() != '=' && !p.inInitialism() {
