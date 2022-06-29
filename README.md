@@ -130,7 +130,7 @@ If you want to run `go test -json` yourself, for example as part of a shell pipe
 
 **`go test -json | gotestdox`**
 
-In this case, any flags or arguments to `gotestdox` will be ignored, and it won't run the tests; it will act purely as a text filter. However, just like when it runs the tests itself, it will report exit status 1 if there are any test failures.
+In this case, any flags or arguments to `gotestdox` will be ignored, and it won't *run* the tests; instead, it will act purely as a text filter. However, just as when it runs the tests itself, it will report exit status 1 if there are any test failures.
 
 ## As a library
 
@@ -146,123 +146,13 @@ As Dan says in his blog post, turning test names into sentences is a very simple
 
 I don't know about you, but I've wasted a lot of time and energy over the years trying to choose good names for tests. I didn't really have a way to evaluate whether the name I chose was good or not. Now I do!
 
-Naming your test as a sentence actually forces you to think about how your code is supposed to *behave*, given some input or circumstances. There needs to at least be a verb.
+In fact, I wrote a whole blog post about it:
 
-For example, suppose we have some function `Match` that tells you whether or not a given input matches the string you're looking for:
-
-```go
-func Match(input, substring string) bool {
-```
-
-What would we name a test for this function? We might instinctively name it:
-
-```
-TestMatch
-```
-
-Pretty standard, and no doubt it does test `Match` in some way, but *what* way, actually? How is `Match` supposed to behave, according to this test? Under what circumstances? Given what input? We don't know. Suppose we're running the tests and all we see is some failure like this:
-
-```
---- FAIL: TestMatch (0.00s)
-```
-
-That's very unhelpful. To find out what this test thinks *should* have happened, but didn't, we need to dig into the code. Ideally, the name of the test itself should tell us everything we need to know!
-
-## Describe the behaviour you want
-
-Of course, a good test will also give us specific information about the failure: if `want` wasn't equal to `got`, it will tell us that. But we still don't know why `want` is *supposed* to equal `got`. In other words, we're missing some critical information: what is the test actually *about*?
-
-We need to switch from thinking about the test name as a piece of useless paperwork to thinking about it as documentation. As soon as we do that, it's clear that the name should be a sentence expressing what happens when the code under test is correct:
-
-```
-Match is true for matching input
-```
-
-In fact, let's lean into this and call them “test sentences” instead of “test names”. That'll prompt us every time we write one: “What's the sentence for this test?”
-
-## Under what circumstances?
-
-When we see this test sentence, it's helpful, but it also immediately prompts us to think, “well, what about *non*-matching input?” Okay. That's another test, then:
-
-```
-Match is false for non matching input
-```
-
-We haven't just improved the names of our existing tests; we've actually generated new test cases. That's powerful. When we're forced to describe some particular case explicitly, it becomes obvious what *other* possibilities exist that we haven't yet tested.
-
-> I see a lot of Go unit tests without the condition, just a list of expectations (or contrariwise, just a list of states without expectations). Either way, it can easily lead to blind spots, things you are not testing that you should be. Let’s include both condition and expectation:
-
-> HandleCategory trims LEADING spaces from valid category\
-> HandleCategory trims TRAILING spaces from valid category\
-> HandleCategory trims LEADING and TRAILING spaces from valid category
-
-> Immediately upon reading those, I bet you noticed we are missing some tests (and/or requirements!). What happens if we give an empty category? Or an invalid category? What constitutes a valid category?\
-—Michael Sorens, [Go Unit Tests: Tips from the Trenches](https://www.red-gate.com/simple-talk/devops/testing/go-unit-tests-tips-from-the-trenches/)
-
-## “Does”, not “should”
-
-It's tempting to include “should” in every test sentence, especially if we're writing the test first:
-
-```
-Match should be true for matching input
-```
-
-I don't think that's necessary, and we can keep our test sentences short and to the point by omitting words like “should”, “must”, and “will”. Just say what it *does*. A good way to think of this is that every test sentence implicitly ends with the words “...when the code is correct”.
-
-We wouldn't say that Match *should* be true when the code is correct, we would say it *is* true! This isn't an aspiration, it's a definition. The definition of “correct” is that Match is true for matching input, and false otherwise.
-
-> The test itself has a name, which can convey useful information if we choose it wisely. It’s a good idea to name each test function after the behaviour it tests. You don’t need to use words like Should, or Must; these are implicit. Just say what the function does when it’s working correctly.\
-—[The Power of Go: Tools](https://bitfieldconsulting.com/books/tools)
-
-## The friendly manual
-
-And that's it! Now we have two sentences that completely describe the important behaviour of `Match`, and `gotestdox` will format them nicely for us:
-
-```
- ✔ Match is true for matching input (0.00s)
- ✔ Match is false for non matching input (0.00s)
- ```
-
-As you accumulate more tests over time, your `gotestdox` output will be a more and more valuable user manual for your package. And that's the right way to think about it. Good tests should focus on *user-visible* behaviour: your public API. So your tests should be named using domain terms that users understand (“A user can log in”), not computer jargon (“Initialize persistent session”).
+* [Test names should be sentences](https://bitfieldconsulting.com/golang/test-names)
 
 It might be interesting to show your `gotestdox` output to users, customers, or business folks, and see if it makes sense to them. If so, you're on the right lines. And it's quite likely to generate some interesting conversations (“Is that really what it does? But that's not what we asked for!”)
 
-## Subtest names should complete a sentence
-
-`gotestdox` encourages you to create tests and subtests with descriptive names, because the results read nicely. For example, here's a snippet of one of its own tests:
-
-```go
-func TestPrettify(t *testing.T) {
-	t.Parallel()
-	tcs := []struct {
-		name, input, want string
-	}{
-		{
-			name:  "correctly renders a well-formed test name",
-			input: "TestSumCorrectlySumsInputNumbers",
-			want:  "Sum correctly sums input numbers",
-		},
-		{
-			name:  "preserves capitalisation of initialisms such as PDF",
-			input: "TestFooGeneratesValidPDFFile",
-			want:  "Foo generates valid PDF file",
-		},
-        ...
-```
-
-These subtests are rendered as:
-
-```
- ✔ Prettify correctly renders a well-formed test name (0.00s)
- ✔ Prettify preserves capitalisation of initialisms such as PDF (0.00s)
- ...
-```
-
-In other words, it's a good idea to name each subtest so that it completes a sentence beginning with the name of the unit under test, describing the specific behaviour checked by that subtest.
-
-If you find it weird at first writing super long test names like `TestRelevantIsFalseForOtherEvents`, don't worry. You'll get used to it quite quickly. We wouldn't want to use function names like this in our application code, certainly. But tests are different. We never *call* these functions, and users don't see them. So if it really doesn't matter what they're called, let's call them something meaningful!
-
-When you've used `gotestdox` a little, it starts to feel perfectly natural to write your test names as descriptive sentences—which is the point, of course.
+It seems that I'm not the only one who finds this idea useful. I hear that `gotestdox` is already being used in some fairly major Go projects and companies, helping their developers to get more value out of their existing tests, and encouraging them to think in interesting new ways about what tests are really for. How nice!
 
 ## Some examples
 
@@ -326,5 +216,7 @@ github.com/bitfield/gotestdox:
 # Links
 
 - [Bitfield Consulting](https://bitfieldconsulting.com/)
+- [Test names should be sentences](https://bitfieldconsulting.com/golang/test-names)
+- [The Power of Go: Tests](https://bitfieldconsulting.com/books/tests-preorder)
 
 <small>Gopher image by [MariaLetta](https://github.com/MariaLetta/free-gophers-pack)</small>
