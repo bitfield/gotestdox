@@ -18,6 +18,7 @@ type TestDoxer struct {
 	Stdin          io.Reader
 	Stdout, Stderr io.Writer
 	OK             bool
+	SplitErrors    bool
 }
 
 // NewTestDoxer returns a *TestDoxer configured with the default I/O streams:
@@ -37,7 +38,16 @@ func NewTestDoxer() *TestDoxer {
 // failure, or 'go test' returned some error, OK will be false.
 func (td *TestDoxer) ExecGoTest(userArgs []string) {
 	args := []string{"test", "-json"}
-	args = append(args, userArgs...)
+
+	for _, arg := range userArgs {
+		if arg == "split-errors" {
+			td.SplitErrors = true
+			continue
+		}
+
+		args = append(args, arg)
+	}
+
 	cmd := exec.Command("go", args...)
 	goTestOutput, err := cmd.StdoutPipe()
 	if err != nil {
@@ -69,6 +79,10 @@ func (td *TestDoxer) Filter() {
 	td.OK = true
 	var curPkg string
 	scanner := bufio.NewScanner(td.Stdin)
+
+	runnedTests := make(map[string][]Event)
+	failedTests := make(map[string][]Event)
+
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
 		if err != nil {
@@ -83,13 +97,30 @@ func (td *TestDoxer) Filter() {
 			continue
 		}
 		if event.Package != curPkg {
-			if curPkg != "" {
-				fmt.Fprintln(td.Stdout)
-			}
-			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
 			curPkg = event.Package
 		}
-		fmt.Fprintln(td.Stdout, event)
+
+		if td.SplitErrors && event.Action == "fail" {
+			failedTests[event.Package] = append(failedTests[event.Package], event)
+		} else {
+			runnedTests[event.Package] = append(runnedTests[event.Package], event)
+		}
+	}
+	for k, v := range runnedTests {
+		fmt.Fprintln(td.Stdout, k)
+		for _, event := range v {
+			fmt.Fprintln(td.Stdout, event)
+		}
+	}
+
+	if td.SplitErrors && len(failedTests) > 0 {
+		fmt.Fprintln(td.Stdout, "\nFailed tests")
+		for k, v := range failedTests {
+			fmt.Fprintln(td.Stdout, k)
+			for _, event := range v {
+				fmt.Fprintln(td.Stdout, event)
+			}
+		}
 	}
 }
 

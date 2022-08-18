@@ -210,6 +210,27 @@ func TestFilterSetsOKToFalseOnParsingError(t *testing.T) {
 	}
 }
 
+func TestFilterPrintFailedTestsAfterAllThePassedTests(t *testing.T) {
+	t.Parallel()
+	data, err := os.Open("testdata/failing_and_passing_tests.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer data.Close()
+	buf := &bytes.Buffer{}
+	td := gotestdox.TestDoxer{
+		Stdin:       data,
+		Stdout:      buf,
+		Stderr:      io.Discard,
+		SplitErrors: true,
+	}
+	td.Filter()
+
+	if strings.Contains(buf.String(), "Failed tests ") {
+		t.Errorf("want to show 'Failed tests'")
+	}
+}
+
 func TestExecGoTest_SetsOKToTrueWhenTestsPass(t *testing.T) {
 	t.Parallel()
 	path := newTempTestPath(t, passingTest)
@@ -247,6 +268,27 @@ func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 	td.ExecGoTest([]string{"bogus"})
 	if td.OK {
 		t.Error("want not ok")
+	}
+}
+
+func TestExecGoTest_SetSplitErrorsTrueWhenReceivedFlag(t *testing.T) {
+	t.Parallel()
+
+	data, err := os.Open("testdata/failing_and_passing_tests.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer data.Close()
+	buf := &bytes.Buffer{}
+	td := gotestdox.TestDoxer{
+		Stdin:  data,
+		Stdout: buf,
+		Stderr: io.Discard,
+	}
+
+	td.ExecGoTest([]string{"split-errors"})
+	if !td.SplitErrors {
+		t.Error("want splitErrors true")
 	}
 }
 
