@@ -18,7 +18,9 @@ type TestDoxer struct {
 	Stdin          io.Reader
 	Stdout, Stderr io.Writer
 	OK             bool
-	SplitErrors    bool
+
+	// SplitErrors is a flag that could be used to print the failed tests after all the passed tests.
+	SplitErrors bool
 }
 
 // NewTestDoxer returns a *TestDoxer configured with the default I/O streams:
@@ -36,6 +38,8 @@ func NewTestDoxer() *TestDoxer {
 // configured Stderr stream, including the full command line that was run. If
 // all tests passed, the TestDoxer's OK field will be true. If there was a test
 // failure, or 'go test' returned some error, OK will be false.
+// If the flag SplitErrors is received all the failed tests will be print after
+// all the passed tests split by package.
 func (td *TestDoxer) ExecGoTest(userArgs []string) {
 	args := []string{"test", "-json"}
 
