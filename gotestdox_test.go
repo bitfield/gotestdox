@@ -272,16 +272,13 @@ func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 }
 
 func TestExecGoTest_SetSplitErrorsTrueWhenReceivedFlag(t *testing.T) {
-	t.Parallel()
+	input := `{"Time":"2022-02-28T15:53:43.532326Z","Action":"pass","Package":"github.com/bitfield/script","Test":"TestFindFilesInNonexistentPathReturnsError","Elapsed":0.12}`
+	myReader := strings.NewReader(input)
 
-	data, err := os.Open("testdata/failing_and_passing_tests.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
 	buf := &bytes.Buffer{}
+
 	td := gotestdox.TestDoxer{
-		Stdin:  data,
+		Stdin:  myReader,
 		Stdout: buf,
 		Stderr: io.Discard,
 	}
