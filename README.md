@@ -217,6 +217,6 @@ github.com/bitfield/gotestdox:
 
 - [Bitfield Consulting](https://bitfieldconsulting.com/)
 - [Test names should be sentences](https://bitfieldconsulting.com/golang/test-names)
-- [The Power of Go: Tests](https://bitfieldconsulting.com/books/tests-preorder)
+- [The Power of Go: Tests](https://bitfieldconsulting.com/books/tests)
 
 <small>Gopher image by [MariaLetta](https://github.com/MariaLetta/free-gophers-pack)</small>
