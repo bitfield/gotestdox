@@ -197,6 +197,27 @@ func TestFilterKeepsTrackOfCurrentPackage(t *testing.T) {
 	}
 }
 
+func TestFilterOrdersTestsByPrettifiedName(t *testing.T) {
+	data, err := os.Open("testdata/unordered_tests.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer data.Close()
+	buf := &bytes.Buffer{}
+	td := gotestdox.TestDoxer{
+		Stdin:  data,
+		Stdout: buf,
+		Stderr: io.Discard,
+	}
+	color.NoColor = true
+	td.Filter()
+	want := "p:\n x A (0.00s)\n ✔ B (0.00s)\n ✔ C (0.00s)\n"
+	got := buf.String()
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
 func TestFilterSetsOKToFalseOnParsingError(t *testing.T) {
 	t.Parallel()
 	td := gotestdox.TestDoxer{
@@ -273,7 +294,12 @@ func newTempTestPath(t *testing.T, data string) (path string) {
 
 func ExampleTestDoxer_Filter() {
 	td := gotestdox.NewTestDoxer()
-	td.Stdin = strings.NewReader(`{"Time":"2022-03-05T11:33:08.167467Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestRelevantIsTrueForTestPassOrFailEvents","Elapsed":0}`)
+	data, err := os.Open("testdata/small_passing_tests.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer data.Close()
+	td.Stdin = data
 	color.NoColor = true
 	td.Filter()
 	// Output:

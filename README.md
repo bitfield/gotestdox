@@ -11,8 +11,8 @@ go install github.com/bitfield/gotestdox/cmd/gotestdox@latest
 `gotestdox` is a command-line tool for turning Go test names into readable sentences. For example, suppose we have some tests named like this:
 
 ```
-TestRelevantIsTrueForTestPassOrFailEvents
 TestRelevantIsFalseForNonPassFailEvents
+TestRelevantIsTrueForTestPassOrFailEvents
 ```
 
 We can transform them into straightforward sentences that express the desired behaviour, by running `gotestdox`:
@@ -22,8 +22,8 @@ We can transform them into straightforward sentences that express the desired be
 This will run the tests, and print:
 
 ```
- ✔ Relevant is true for test pass or fail events (0.00s)
  ✔ Relevant is false for non pass fail events (0.00s)
+ ✔ Relevant is true for test pass or fail events (0.00s)
 ```
 
 # Why
@@ -85,8 +85,8 @@ Each package's test results will be prefixed by the fully-qualified name of the 
 
 ```
 github.com/octocat/mymodule/api:
- ✔ NewServer returns a correctly configured server (0.00s)
  ✔ NewServer errors on invalid config options (0.00s)
+ ✔ NewServer returns a correctly configured server (0.00s)
 
 github.com/octocat/mymodule/util:
  ✔ LeftPad adds the correct number of leading spaces (0.00s)

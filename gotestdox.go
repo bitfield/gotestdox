@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
 	"github.com/fatih/color"
@@ -61,13 +62,14 @@ func (td *TestDoxer) ExecGoTest(userArgs []string) {
 // Filter reads from the TestDoxer's Stdin stream, line by line, processing JSON
 // records emitted by 'go test -json'. For each Go package it sees records
 // about, it will print the full name of the package to Stdout, followed by a
-// line giving the pass/fail status and the prettified name of each test. If all
-// tests passed, the TestDoxer's OK field will be true at the end. If not, or if
-// there was a parsing error, it will be false. Errors will be reported to
-// Stderr.
+// line giving the pass/fail status and the prettified name of each test, sorted
+// alphabetically. If all tests passed, the TestDoxer's OK field will be true at
+// the end. If not, or if there was a parsing error, it will be false. Errors
+// will be reported to Stderr.
 func (td *TestDoxer) Filter() {
 	td.OK = true
 	var curPkg string
+	results := []string{}
 	scanner := bufio.NewScanner(td.Stdin)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
@@ -79,17 +81,26 @@ func (td *TestDoxer) Filter() {
 		if event.Action == "fail" {
 			td.OK = false
 		}
+		if event.Test == "" && (event.Action == "pass" || event.Action == "fail") {
+			// package pass event
+			sort.Strings(results)
+			for _, r := range results {
+				fmt.Fprintln(td.Stdout, r)
+			}
+			results = results[:0]
+		}
 		if !event.Relevant() {
 			continue
 		}
 		if event.Package != curPkg {
+			// new package seen
 			if curPkg != "" {
 				fmt.Fprintln(td.Stdout)
 			}
 			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
 			curPkg = event.Package
 		}
-		fmt.Fprintln(td.Stdout, event)
+		results = append(results, event.String())
 	}
 }
 
