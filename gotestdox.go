@@ -68,8 +68,7 @@ func (td *TestDoxer) ExecGoTest(userArgs []string) {
 // will be reported to Stderr.
 func (td *TestDoxer) Filter() {
 	td.OK = true
-	var curPkg string
-	results := []Event{}
+	results := map[string][]Event{}
 	scanner := bufio.NewScanner(td.Stdin)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
@@ -81,29 +80,21 @@ func (td *TestDoxer) Filter() {
 		if event.Action == "fail" {
 			td.OK = false
 		}
-		if event.Test == "" && (event.Action == "pass" || event.Action == "fail") {
-			// package pass/fail event
-			sort.Slice(results, func(i, j int) bool {
-				return results[i].Sentence < results[j].Sentence
+		if event.IsPackageResult() {
+			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
+			tests := results[event.Package]
+			sort.Slice(tests, func(i, j int) bool {
+				return tests[i].Sentence < tests[j].Sentence
 			})
-			for _, r := range results {
+			for _, r := range tests {
 				fmt.Fprintln(td.Stdout, r.String())
 			}
-			results = results[:0]
+			fmt.Fprintln(td.Stdout)
 		}
-		if !event.Relevant() {
-			continue
+		if event.Relevant() {
+			event.Sentence = Prettify(event.Test)
+			results[event.Package] = append(results[event.Package], event)
 		}
-		if event.Package != curPkg {
-			// new package seen
-			if curPkg != "" {
-				fmt.Fprintln(td.Stdout)
-			}
-			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
-			curPkg = event.Package
-		}
-		event.Sentence = Prettify(event.Test)
-		results = append(results, event)
 	}
 }
 
@@ -144,6 +135,19 @@ func (e Event) String() string {
 func (e Event) Relevant() bool {
 	// Events on non-tests are irrelevant
 	if !strings.HasPrefix(e.Test, "Test") {
+		return false
+	}
+	if e.Action == "pass" || e.Action == "fail" {
+		return true
+	}
+	return false
+}
+
+// IsPackageResult determines whether or not the test event is a "package
+// pass/fail event": that is, whether it indicates the passing or failing of a
+// package as a whole, rather than some individual test within the package.
+func (e Event) IsPackageResult() bool {
+	if e.Test != "" {
 		return false
 	}
 	if e.Action == "pass" || e.Action == "fail" {

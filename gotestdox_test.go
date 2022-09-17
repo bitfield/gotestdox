@@ -109,6 +109,48 @@ func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
 	}
 }
 
+func TestIsPackageResult_IsTrueForPackageResultEvents(t *testing.T) {
+	t.Parallel()
+	tcs := []gotestdox.Event{
+		{
+			Action: "pass",
+			Test:   "",
+		},
+		{
+			Action: "fail",
+			Test:   "",
+		},
+	}
+	for _, event := range tcs {
+		if !event.IsPackageResult() {
+			t.Errorf("false for package result event %#v", event)
+		}
+	}
+}
+
+func TestIsPackageResult_IsFalseForNonPackageResultEvents(t *testing.T) {
+	t.Parallel()
+	tcs := []gotestdox.Event{
+		{
+			Action: "pass",
+			Test:   "TestSomething",
+		},
+		{
+			Action: "fail",
+			Test:   "TestSomething",
+		},
+		{
+			Action: "output",
+			Test:   "",
+		},
+	}
+	for _, event := range tcs {
+		if event.IsPackageResult() {
+			t.Errorf("true for non package result event %#v", event)
+		}
+	}
+}
+
 func TestNewTestDoxer_ReturnsTestdoxerWithStandardIOStreams(t *testing.T) {
 	t.Parallel()
 	td := gotestdox.NewTestDoxer()
@@ -211,7 +253,7 @@ func TestFilterOrdersTestsByPrettifiedName(t *testing.T) {
 	}
 	color.NoColor = true
 	td.Filter()
-	want := "p:\n ✔ A (0.00s)\n x B (0.00s)\n ✔ C (0.00s)\n"
+	want := "p:\n ✔ A (0.00s)\n x B (0.00s)\n ✔ C (0.00s)\n\n"
 	got := buf.String()
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -232,7 +274,7 @@ func TestFilterHandlesOutOfOrderPackageEvents(t *testing.T) {
 	}
 	color.NoColor = true
 	td.Filter()
-	want := "p:\n ✔ A (0.00s)\n x B (0.00s)\n ✔ C (0.00s)\n\nq:\n ✔ A (0.00s)\n ✔ B (0.00s)\n"
+	want := "p:\n ✔ A (0.00s)\n x B (0.00s)\n ✔ C (0.00s)\n\nq:\n ✔ A (0.00s)\n ✔ B (0.00s)\n\n"
 	got := buf.String()
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
