@@ -1,4 +1,4 @@
-{"Time":"2022-03-12T12:40:29.833467Z","Action":"pass","Package":"p","Test":"Test_B","Elapsed":0}
-{"Time":"2022-03-12T12:40:29.833467Z","Action":"fail","Package":"p","Test":"TestA","Elapsed":0}
+{"Time":"2022-03-12T12:40:29.833467Z","Action":"fail","Package":"p","Test":"Test_B","Elapsed":0}
+{"Time":"2022-03-12T12:40:29.833467Z","Action":"pass","Package":"p","Test":"TestA","Elapsed":0}
 {"Time":"2022-03-12T12:40:29.833467Z","Action":"pass","Package":"p","Test":"TestC","Elapsed":0}
 {"Time":"2022-03-12T12:40:29.833467Z","Action":"fail","Package":"p","Elapsed":0}
