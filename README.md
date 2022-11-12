@@ -1,14 +1,16 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/bitfield/gotestdox.svg)](https://pkg.go.dev/github.com/bitfield/gotestdox)[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)[![Go Report Card](https://goreportcard.com/badge/github.com/bitfield/gotestdox)](https://goreportcard.com/report/github.com/bitfield/gotestdox)[![CircleCI](https://circleci.com/gh/bitfield/gotestdox.svg?style=svg)](https://circleci.com/gh/bitfield/gotestdox)
 
+![Writing gopher logo](img/gotestdox.png)
+
+`gotestdox` is a command-line tool for turning Go test names into readable sentences. Here's how to install it:
+
 ```
 go install github.com/bitfield/gotestdox/cmd/gotestdox@latest
 ```
 
-![Writing gopher logo](img/gotestdox.png)
+# What?
 
-# `gotestdox`
-
-`gotestdox` is a command-line tool for turning Go test names into readable sentences. For example, suppose we have some tests named like this:
+For example, suppose we have some tests named like this:
 
 ```
 TestRelevantIsFalseForNonPassFailEvents
@@ -26,7 +28,7 @@ This will run the tests, and print:
  ✔ Relevant is true for test pass or fail events (0.00s)
 ```
 
-# Why
+# Why?
 
 I read a blog post by Dan North, which says:
 
@@ -37,7 +39,7 @@ I read a blog post by Dan North, which says:
 > Developers discovered it could do at least some of their documentation for them, so they started to write test methods that were real sentences.\
 —Dan North, [Introducing BDD](https://dannorth.net/introducing-bdd/)
 
-# How
+# How?
 
 The original [`testdox`](https://github.com/astubbs/testdox) tool (part of `agiledox`) was very simple, as Dan describes: it just turned a camel-case JUnit test name like `testFailsForDuplicateCustomers` into a space-separated sentence like `fails for duplicate customers`.
 
@@ -132,9 +134,9 @@ If you want to run `go test -json` yourself, for example as part of a shell pipe
 
 In this case, any flags or arguments to `gotestdox` will be ignored, and it won't *run* the tests; instead, it will act purely as a text filter. However, just as when it runs the tests itself, it will report exit status 1 if there are any test failures.
 
-## As a library
+## As a package
 
-See [pkg.go.dev/github.com/bitfield/gotestdox](https://pkg.go.dev/github.com/bitfield/gotestdox) for the full documentation on using `gotestdox` as a library package.
+See [pkg.go.dev/github.com/bitfield/gotestdox](https://pkg.go.dev/github.com/bitfield/gotestdox) for the full documentation on using `gotestdox` as a package in your own programs.
 
 # So what?
 
@@ -153,65 +155,6 @@ In fact, I wrote a whole blog post about it:
 It might be interesting to show your `gotestdox` output to users, customers, or business folks, and see if it makes sense to them. If so, you're on the right lines. And it's quite likely to generate some interesting conversations (“Is that really what it does? But that's not what we asked for!”)
 
 It seems that I'm not the only one who finds this idea useful. I hear that `gotestdox` is already being used in some fairly major Go projects and companies, helping their developers to get more value out of their existing tests, and encouraging them to think in interesting new ways about what tests are really for. How nice!
-
-## Some examples
-
-Here is the complete `gotestdox` rendering of its own tests (sorted for readability), in case it gives you any useful ideas:
-
-```
-github.com/bitfield/gotestdox:
- ✔ EventString formats pass and fail events differently (0.00s)
- ✔ ExecGoTest sets OK to false when command errors (0.02s)
- ✔ ExecGoTest sets OK to false when tests fail (0.76s)
- ✔ ExecGoTest sets OK to true when tests pass (0.63s)
- ✔ Filter keeps track of current package (0.00s)
- ✔ Filter sets OK to false if any test fails (0.01s)
- ✔ Filter sets OK to false on parsing error (0.00s)
- ✔ Filter sets OK to true if there are no test failures (0.01s)
- ✔ Filter skips irrelevant events (0.01s)
- ✔ NewTestDoxer returns testdoxer with standard IO streams (0.00s)
- ✔ ParseJSON errors on invalid JSON (0.00s)
- ✔ ParseJSON returns valid data for valid JSON (0.00s)
- ✔ Prettifier logs to debug writer (0.00s)
- ✔ Prettify (0.01s)
- ✔ Prettify accepts a single-letter test name (0.00s)
- ✔ Prettify accepts a single-word test name (0.00s)
- ✔ Prettify does not break words when a digit follows an '=' sign (0.00s)
- ✔ Prettify does not erase the final digit in words that end with a digit (0.00s)
- ✔ Prettify does not hang when name ends with initialism (0.00s)
- ✔ Prettify does not treat an underscore in a subtest name as marking the end of a multiword function name (0.00s)
- ✔ Prettify doesn't incorrectly title-case single-letter words (0.00s)
- ✔ Prettify eliminates any words containing underscores after splitting (0.00s)
- ✔ Prettify handles a test with no name, but with subtests (0.00s)
- ✔ Prettify handles multiple underscores, with the first marking the end of a multiword function name (0.00s)
- ✔ Prettify inserts a word break before subtest names beginning with a lowercase letter (0.00s)
- ✔ Prettify is okay with test names not in the form of a sentence (0.00s)
- ✔ Prettify keeps a trailing digit as part of an initialism (0.00s)
- ✔ Prettify keeps numbers within a hyphenated word (0.00s)
- ✔ Prettify keeps together digits in numbers that are standalone words (0.00s)
- ✔ Prettify keeps together hyphenated words with initial capitals (0.00s)
- ✔ Prettify knows that just 'test' is a valid test name (0.00s)
- ✔ Prettify preserves capitalisation of initialism when it is the first word (0.00s)
- ✔ Prettify preserves capitalisation of initialisms such as 'PDF' (0.00s)
- ✔ Prettify preserves capitalisation of two-letter initialisms such as 'OK' (0.00s)
- ✔ Prettify preserves initialisms containing digits (0.00s)
- ✔ Prettify preserves initialisms containing digits with two or more leading alpha characters (0.00s)
- ✔ Prettify preserves longer all-caps words (0.00s)
- ✔ Prettify recognises a dash followed by a digit as a negative number (0.00s)
- ✔ Prettify renders subtest names without the slash, and with underscores replaced by spaces (0.00s)
- ✔ Prettify replaces camel-case transitions with spaces (0.00s)
- ✔ Prettify retains apostrophised words in their original form (0.00s)
- ✔ Prettify retains capitalisation of initialisms in a multiword function name (0.00s)
- ✔ Prettify retains hyphenated words in their original form (0.00s)
- ✔ Prettify retains quoted words as quoted (0.00s)
- ✔ Prettify treats a single underscore as marking the end of a multiword function name (0.00s)
- ✔ Prettify treats a single underscore before the first slash as marking the end of a multiword function name (0.00s)
- ✔ Prettify treats consecutive underscores as a single word break (0.00s)
- ✔ Prettify treats numbers as word separators (0.00s)
- ✔ Prettify treats underscores as word breaks (0.00s)
- ✔ Relevant is false for non test pass fail events (0.00s)
- ✔ Relevant is true for test pass or fail events (0.00s)
-```
 
 # Links
 

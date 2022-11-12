@@ -8,39 +8,50 @@ import (
 	"unicode"
 )
 
-const eof rune = 0
-
-var DebugWriter io.Writer = os.Stderr
-
-// Prettify takes a string representing the name of a Go test, and attempts to
-// turn it into a readable sentence, by replacing camel-case transitions and
-// underscores with spaces.
+// Prettify takes a string input representing the name of a Go test, and
+// attempts to turn it into a readable sentence, by replacing camel-case
+// transitions and underscores with spaces.
 //
-// The input is expected to be a valid Go test name, as encoded by 'go test
-// -json'. For example, the input might be: 'TestFoo/has_well-formed_output'.
+// input is expected to be a valid Go test name, as produced by 'go test
+// -json'. For example, input might be the string:
 //
-// Here, the parent test is 'TestFoo', and this data is about a subtest whose
-// name is 'has well-formed output'. Go replaces spaces in subtest names with
-// underscores, and unprintable characters with the equivalent Go literal:
-// https://cs.opensource.google/go/go/+/refs/tags/go1.17.8:src/testing/match.go;l=133;drc=refs%2Ftags%2Fgo1.17.8
+//	TestFoo/has_well-formed_output
 //
-// Prettify does its best to undo this, yielding (something close to) the
-// original subtest name. For example: "Foo has well-formed output".
+// Here, the parent test is TestFoo, and this data is about a subtest whose
+// name is 'has well-formed output'. Go's [testing] package replaces spaces in
+// subtest names with underscores, and unprintable characters with the
+// equivalent Go literal.
 //
-// Multiword function names
+// Prettify does its best to reverse this transformation, yielding (something
+// close to) the original subtest name. For example:
+//
+//	Foo has well-formed output
+//
+// # Multiword function names
 //
 // Because Go function names are often in camel-case, there's an ambiguity in
-// parsing a test name like this: 'TestHandleInputClosesInputAfterReading'.
+// parsing a test name like this:
 //
-// We can see that this is about a function named 'HandleInput', but Prettify
-// has no way of knowing that. To give it a hint, we can put an underscore after
-// the name of the function. This will be interpreted as marking the end of a
-// multiword function name. Example: "TestHandleInput_ClosesInputAfterReading".
+//	TestHandleInputClosesInputAfterReading
 //
-// Debugging
+// We can see that this is about a function named HandleInput, but Prettify has
+// no way of knowing that. Without this information, it would produce:
+//
+//	Handle input closes input after reading
+//
+// To give it a hint, we can add an underscore after the name of the function:
+//
+//	TestHandleInput_ClosesInputAfterReading
+//
+// This will be interpreted as marking the end of a multiword function name:
+//
+//	HandleInput closes input after reading
+//
+// # Debugging
 //
 // If the GOTESTDOX_DEBUG environment variable is set, Prettify will output
-// (copious) debug information to os.Stderr, elaborating on its decisions.
+// (copious) debug information to the [DebugWriter] stream, elaborating on its
+// decisions.
 func Prettify(input string) string {
 	p := &prettifier{
 		input: []rune(strings.TrimPrefix(input, "Test")),
@@ -236,3 +247,9 @@ func inWord(p *prettifier) stateFunc {
 		}
 	}
 }
+
+const eof rune = 0
+
+// DebugWriter identifies the stream to which debug information should be
+// printed, if desired. By default it is [os.Stderr].
+var DebugWriter io.Writer = os.Stderr

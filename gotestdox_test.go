@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/bitfield/gotestdox"
@@ -190,35 +191,32 @@ func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 }
 
 func ExampleTestDoxer_Filter() {
+	input := `{"Action":"pass","Package":"demo","Test":"TestItWorks"}
+	{"Action":"pass","Package":"demo","Elapsed":0}`
 	td := gotestdox.NewTestDoxer()
-	data, err := os.Open("testdata/example.json")
-	if err != nil {
-		panic(err)
-	}
-	defer data.Close()
-	td.Stdin = data
+	td.Stdin = strings.NewReader(input)
 	color.NoColor = true
 	td.Filter()
 	// Output:
-	// github.com/bitfield/gotestdox:
-	//  ✔ Relevant is true for test pass or fail events (0.00s)
+	// demo:
+	//  ✔ It works (0.00s)
 }
 
 func ExampleEvent_String() {
 	event := gotestdox.Event{
 		Action:   "pass",
-		Sentence: "EventString formats pass and fail events differently",
+		Sentence: "It works",
 	}
 	color.NoColor = true
 	fmt.Println(event.String())
 	// Output:
-	// ✔ EventString formats pass and fail events differently (0.00s)
+	// ✔ It works (0.00s)
 }
 
 func ExampleEvent_Relevant_true() {
 	event := gotestdox.Event{
 		Action: "pass",
-		Test:   "TestFoo",
+		Test:   "TestItWorks",
 	}
 	fmt.Println(event.Relevant())
 	// Output:
@@ -228,7 +226,7 @@ func ExampleEvent_Relevant_true() {
 func ExampleEvent_Relevant_false() {
 	event := gotestdox.Event{
 		Action: "fail",
-		Test:   "ExampleFoo",
+		Test:   "ExampleIsIrrelevant",
 	}
 	fmt.Println(event.Relevant())
 	// Output:
@@ -236,12 +234,12 @@ func ExampleEvent_Relevant_false() {
 }
 
 func ExampleParseJSON() {
-	input := `{"Time":"2022-03-05T11:33:08.167467Z","Action":"pass","Package":"github.com/bitfield/gotestdox","Test":"TestRelevantIsTrueForTestPassOrFailEvents","Elapsed":0}`
+	input := `{"Action":"pass","Package":"demo","Test":"TestItWorks","Elapsed":0.2}`
 	event, err := gotestdox.ParseJSON(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("%#v\n", event)
 	// Output:
-	// gotestdox.Event{Action:"pass", Package:"github.com/bitfield/gotestdox", Test:"TestRelevantIsTrueForTestPassOrFailEvents", Sentence:"", Elapsed:0}
+	// gotestdox.Event{Action:"pass", Package:"demo", Test:"TestItWorks", Sentence:"", Elapsed:0.2}
 }
