@@ -1,0 +1,27 @@
+env GOTESTDOX_DEBUG=1
+stdin input.json
+exec gotestdox
+cmp stdout golden.txt
+cmp stderr debug.txt
+
+-- input.json --
+{"Action":"pass","Package":"dummy","Test":"TestItWorks"}
+{"Action":"pass","Package":"dummy","Elapsed":0.18}
+-- golden.txt --
+dummy:
+ ✔ It works (0.00s)
+
+-- debug.txt --
+input: TestItWorks
+betweenWords: [] -> I
+inWord: [I] -> t
+inWord: [It] -> W
+emit "It"
+betweenWords: [] -> W
+inWord: [W] -> o
+inWord: [Wo] -> r
+inWord: [Wor] -> k
+inWord: [Work] -> s
+inWord: [Works] -> EOF
+emit "works"
+result: "It works"

@@ -65,8 +65,9 @@ func Prettify(input string) string {
 	for state := betweenWords; state != nil; {
 		state = state(p)
 	}
-	p.log("result:", p.words, "\n")
-	return strings.Join(p.words, " ")
+	result := strings.Join(p.words, " ")
+	p.log(fmt.Sprintf("result: %q", result))
+	return result
 }
 
 // Heavily inspired by Rob Pike's talk on 'Lexical Scanning in Go':
