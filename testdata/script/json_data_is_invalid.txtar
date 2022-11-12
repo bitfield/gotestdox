@@ -1,0 +1,5 @@
+stdin invalid.json
+! exec gotestdox
+
+-- invalid.json --
+bogus

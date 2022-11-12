@@ -1,0 +1,17 @@
+stdin failing.json
+! exec gotestdox
+cmp stdout golden.txt
+
+-- failing.json --
+{"Action":"run","Package":"dummy","Test":"TestDummy"}
+{"Action":"output","Package":"dummy","Test":"TestDummy","Output":"=== RUN   TestDummy\n"}
+{"Action":"output","Package":"dummy","Test":"TestDummy","Output":"--- FAIL: TestDummy (0.00s)\n"}
+{"Action":"fail","Package":"dummy","Test":"TestDummy"}
+{"Action":"output","Package":"dummy","Output":"FAIL\n"}
+{"Action":"output","Package":"dummy","Output":"exit status 1\n"}
+{"Action":"output","Package":"dummy","Output":"FAIL\tdummy\t0.222s\n"}
+{"Action":"fail","Package":"dummy","Elapsed":0.222}
+-- golden.txt --
+dummy:
+ x Dummy (0.00s)
+

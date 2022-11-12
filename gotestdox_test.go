@@ -1,18 +1,30 @@
 package gotestdox_test
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/bitfield/gotestdox"
 	"github.com/fatih/color"
 	"github.com/google/go-cmp/cmp"
+	"github.com/rogpeppe/go-internal/testscript"
 )
+
+func TestMain(m *testing.M) {
+	os.Exit(testscript.RunMain(m, map[string]func() int{
+		"gotestdox": gotestdox.Main,
+	}))
+}
+
+func TestGotestdoxProducesCorrectOutputWhen(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, testscript.Params{
+		Dir: "testdata/script",
+	})
+}
 
 func TestParseJSON_ReturnsValidDataForValidJSON(t *testing.T) {
 	t.Parallel()
@@ -165,163 +177,6 @@ func TestNewTestDoxer_ReturnsTestdoxerWithStandardIOStreams(t *testing.T) {
 	}
 }
 
-func TestFilterSetsOKToTrueIfThereAreNoTestFailures(t *testing.T) {
-	t.Parallel()
-	data, err := os.Open("testdata/passing_tests.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
-	td := gotestdox.TestDoxer{
-		Stdin:  data,
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	}
-	td.Filter()
-	if !td.OK {
-		t.Error("not OK")
-	}
-}
-
-func TestFilterSetsOKToFalseIfAnyTestFails(t *testing.T) {
-	t.Parallel()
-	data, err := os.Open("testdata/failing_tests.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
-	td := gotestdox.TestDoxer{
-		Stdin:  data,
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	}
-	td.Filter()
-	if td.OK {
-		t.Error("got OK")
-	}
-}
-
-func TestFilterSkipsIrrelevantEvents(t *testing.T) {
-	t.Parallel()
-	data, err := os.Open("testdata/passing_tests.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
-	buf := &bytes.Buffer{}
-	td := gotestdox.TestDoxer{
-		Stdin:  data,
-		Stdout: buf,
-		Stderr: io.Discard,
-	}
-	td.Filter()
-	if strings.Contains(buf.String(), "Example") {
-		t.Error("irrelevant event (Example)")
-	}
-}
-
-func TestFilterKeepsTrackOfCurrentPackage(t *testing.T) {
-	t.Parallel()
-	data, err := os.Open("testdata/packages.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
-	buf := &bytes.Buffer{}
-	td := gotestdox.TestDoxer{
-		Stdin:  data,
-		Stdout: buf,
-		Stderr: io.Discard,
-	}
-	td.Filter()
-	if strings.Count(buf.String(), "a:") > 1 {
-		t.Error("want package a to be shown only once")
-	}
-}
-
-func TestFilterOrdersTestsByPrettifiedName(t *testing.T) {
-	data, err := os.Open("testdata/unordered_tests.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
-	buf := &bytes.Buffer{}
-	td := gotestdox.TestDoxer{
-		Stdin:  data,
-		Stdout: buf,
-		Stderr: io.Discard,
-	}
-	color.NoColor = true
-	td.Filter()
-	want := "p:\n ✔ A (0.00s)\n x B (0.00s)\n ✔ C (0.00s)\n\n"
-	got := buf.String()
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func TestFilterHandlesOutOfOrderPackageEvents(t *testing.T) {
-	data, err := os.Open("testdata/multi_packages.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer data.Close()
-	buf := &bytes.Buffer{}
-	td := gotestdox.TestDoxer{
-		Stdin:  data,
-		Stdout: buf,
-		Stderr: io.Discard,
-	}
-	color.NoColor = true
-	td.Filter()
-	want := "p:\n ✔ A (0.00s)\n x B (0.00s)\n ✔ C (0.00s)\n\nq:\n ✔ A (0.00s)\n ✔ B (0.00s)\n\n"
-	got := buf.String()
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func TestFilterSetsOKToFalseOnParsingError(t *testing.T) {
-	t.Parallel()
-	td := gotestdox.TestDoxer{
-		Stdin:  strings.NewReader("invalid"),
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	}
-	td.Filter()
-	if td.OK {
-		t.Error("got OK")
-	}
-}
-
-func TestExecGoTest_SetsOKToTrueWhenTestsPass(t *testing.T) {
-	t.Parallel()
-	path := newTempTestPath(t, passingTest)
-	td := gotestdox.TestDoxer{
-		Stdin:  strings.NewReader("invalid"),
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	}
-	td.ExecGoTest([]string{path})
-	if !td.OK {
-		t.Error("want ok")
-	}
-}
-
-func TestExecGoTest_SetsOKToFalseWhenTestsFail(t *testing.T) {
-	t.Parallel()
-	path := newTempTestPath(t, failingTest)
-	td := gotestdox.TestDoxer{
-		Stdin:  strings.NewReader("invalid"),
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	}
-	td.ExecGoTest([]string{path})
-	if td.OK {
-		t.Error("want not ok")
-	}
-}
-
 func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 	t.Parallel()
 	td := gotestdox.TestDoxer{
@@ -334,30 +189,9 @@ func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 	}
 }
 
-var (
-	preamble    = "package dummy\nimport \"testing\"\nfunc TestDummy(t *testing.T)"
-	passingTest = preamble + "{}"
-	failingTest = preamble + "{t.FailNow()}"
-)
-
-func newTempTestPath(t *testing.T, data string) (path string) {
-	t.Helper()
-	testDir := t.TempDir()
-	err := os.WriteFile(testDir+"/go.mod", []byte("module dummy"), os.ModePerm)
-	if err != nil {
-		t.Fatal(err)
-	}
-	path = testDir + "/dummy_test.go"
-	err = os.WriteFile(path, []byte(data), os.ModePerm)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return path
-}
-
 func ExampleTestDoxer_Filter() {
 	td := gotestdox.NewTestDoxer()
-	data, err := os.Open("testdata/small_passing_tests.txt")
+	data, err := os.Open("testdata/example.json")
 	if err != nil {
 		panic(err)
 	}

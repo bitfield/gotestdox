@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-isatty"
 )
 
 // TestDoxer holds the state and config associated with a particular invocation
@@ -166,4 +167,17 @@ func ParseJSON(line string) (Event, error) {
 		return Event{}, fmt.Errorf("parsing JSON: %w\ninput: %s", err, line)
 	}
 	return event, nil
+}
+
+func Main() int {
+	td := NewTestDoxer()
+	if isatty.IsTerminal(os.Stdin.Fd()) {
+		td.ExecGoTest(os.Args[1:])
+	} else {
+		td.Filter()
+	}
+	if !td.OK {
+		return 1
+	}
+	return 0
 }

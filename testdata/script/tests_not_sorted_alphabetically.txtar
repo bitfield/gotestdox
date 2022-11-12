@@ -1,0 +1,15 @@
+stdin input.json
+! exec gotestdox
+cmp stdout golden.txt
+
+-- input.json --
+{"Action":"fail","Package":"p","Test":"Test_B"}
+{"Action":"pass","Package":"p","Test":"TestA"}
+{"Action":"pass","Package":"p","Test":"TestC"}
+{"Action":"fail","Package":"p"}
+-- golden.txt --
+p:
+ ✔ A (0.00s)
+ x B (0.00s)
+ ✔ C (0.00s)
+
