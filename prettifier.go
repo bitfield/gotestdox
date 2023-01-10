@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 	"unicode"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // Prettify takes a string input representing the name of a Go test, and
@@ -120,11 +123,15 @@ func (p *prettifier) emit() {
 	word := string(p.input[p.start:p.pos])
 	switch {
 	case len(p.words) == 0:
-		word = strings.Title(word)
+		// This is the first word
+		word = cases.Title(language.Und, cases.NoLower).String(word)
 	case len(word) == 1:
-		word = strings.ToLower(word)
-	case !p.inInitialism():
-		word = strings.ToLower(word)
+		// Single letter word such as A
+		word = cases.Lower(language.Und).String(word)
+	case p.inInitialism():
+		// leave capitalisation as is
+	default:
+		word = cases.Lower(language.Und).String(word)
 	}
 	p.log(fmt.Sprintf("emit %q", word))
 	p.words = append(p.words, word)
@@ -134,7 +141,7 @@ func (p *prettifier) emit() {
 func (p *prettifier) multiWordFunction() {
 	var fname string
 	for _, w := range p.words {
-		fname += strings.Title(w)
+		fname += cases.Title(language.Und, cases.NoLower).String(w)
 	}
 	p.log("multiword function", fname)
 	p.words = []string{fname}
