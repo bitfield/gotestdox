@@ -219,4 +219,9 @@ var Cases = []struct {
 		input: "TestBC35A",
 		want:  "BC35A",
 	},
+	{
+		name:  "preserves plural initialisms",
+		input: "TestFooReturnsIDsAValue",
+		want:  "Foo returns IDs a value",
+	},
 }
