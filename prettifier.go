@@ -109,7 +109,7 @@ func (p *prettifier) peek() rune {
 
 func (p *prettifier) inInitialism() bool {
 	for _, r := range p.input[p.start:p.pos] {
-		if unicode.IsLower(r) {
+		if unicode.IsLower(r) && r != 's' {
 			return false
 		}
 	}
@@ -241,6 +241,11 @@ func inWord(p *prettifier) stateFunc {
 				// keep going
 				p.next()
 				continue
+			}
+			if p.inInitialism() && r == 's' {
+				p.next()
+				p.emit()
+				return betweenWords
 			}
 			// start a new word
 			p.backup()
