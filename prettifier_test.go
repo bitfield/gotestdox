@@ -224,4 +224,9 @@ var Cases = []struct {
 		input: "TestFooReturnsIDsAValue",
 		want:  "Foo returns IDs a value",
 	},
+	{
+		name:  "does not treat 'Is' or 'As' as initialisms",
+		input: "TestThisIsAsItShouldBe",
+		want:  "This is as it should be",
+	},
 }
