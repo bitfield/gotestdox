@@ -112,7 +112,7 @@ func (p *prettifier) peek() rune {
 
 func (p *prettifier) inInitialism() bool {
 	// deal with Is and As corner cases
-	if p.input[p.start+1] == 's' {
+	if len(p.input) > p.start+1 && p.input[p.start+1] == 's' {
 		return false
 	}
 	for _, r := range p.input[p.start:p.pos] {

@@ -229,4 +229,9 @@ var Cases = []struct {
 		input: "TestThisIsAsItShouldBe",
 		want:  "This is as it should be",
 	},
+	{
+		name:  "does not panic when a single-letter word ends the sentence",
+		input: "TestShiftTransforms255To0",
+		want:  "Shift transforms 255 to 0",
+	},
 }
