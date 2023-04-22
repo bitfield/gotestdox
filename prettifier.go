@@ -237,6 +237,7 @@ func inWord(p *prettifier) stateFunc {
 				continue
 			}
 			p.emit()
+			return betweenWords
 		default:
 			if p.pos-p.start <= 1 {
 				// word too short
