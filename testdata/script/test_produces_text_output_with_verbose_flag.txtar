@@ -1,0 +1,20 @@
+stdin input.json
+exec gotestdox -v
+cmp stdout golden.txt
+
+-- input.json --
+{"Action":"run","Package":"dummy","Test":"TestDummy"}
+{"Action":"output","Package":"dummy","Test":"TestDummy","Output":"=== RUN   TestDummy\n"}
+{"Action":"output","Package":"dummy","Test":"TestDummy","Output":"    file_test.go:75: hello"}
+{"Action":"output","Package":"dummy","Test":"TestDummy","Output":"--- PASS: TestDummy (0.00s)\n"}
+{"Action":"pass","Package":"dummy","Test":"TestDummy"}
+{"Action":"output","Package":"dummy","Output":"PASS\n"}
+{"Action":"output","Package":"dummy","Output":"ok  \tdummy\t0.180s\n"}
+{"Action":"pass","Package":"dummy","Elapsed":0.18}
+-- golden.txt --
+dummy:
+ ✔ Dummy (0.00s)
+     Output:
+       file_test.go:75:
+         hello
+

@@ -48,6 +48,7 @@ func TestParseJSON_ReturnsValidDataForValidJSON(t *testing.T) {
 
 func TestParseJSON_ErrorsOnInvalidJSON(t *testing.T) {
 	t.Parallel()
+	t.Log("lala")
 	input := `invalid`
 	_, err := gotestdox.ParseJSON(input)
 	if err == nil {
@@ -70,7 +71,7 @@ func TestEventString_FormatsPassAndFailEventsDifferently(t *testing.T) {
 	}
 }
 
-func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
+func TestIsFinishedTestIsTrueForTestPassOrFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
 		{
@@ -83,14 +84,14 @@ func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 		},
 	}
 	for _, event := range tcs {
-		relevant := event.Relevant()
+		relevant := event.IsFinishedTest()
 		if !relevant {
 			t.Errorf("false for relevant event %q on %q", event.Action, event.Test)
 		}
 	}
 }
 
-func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
+func TestIsFinishedTestIsFalseForNonTestPassFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
 		{
@@ -115,7 +116,7 @@ func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
 		},
 	}
 	for _, event := range tcs {
-		relevant := event.Relevant()
+		relevant := event.IsFinishedTest()
 		if relevant {
 			t.Errorf("true for irrelevant event %q on %q", event.Action, event.Test)
 		}
@@ -184,7 +185,7 @@ func TestExecGoTest_SetsOKToFalseWhenCommandErrors(t *testing.T) {
 		Stdout: io.Discard,
 		Stderr: io.Discard,
 	}
-	td.ExecGoTest([]string{"bogus"})
+	td.ExecGoTest([]string{"bogus"}, false)
 	if td.OK {
 		t.Error("want not ok")
 	}
@@ -196,7 +197,7 @@ func ExampleTestDoxer_Filter() {
 	td := gotestdox.NewTestDoxer()
 	td.Stdin = strings.NewReader(input)
 	color.NoColor = true
-	td.Filter()
+	td.Filter(false)
 	// Output:
 	// demo:
 	//  ✔ It works (0.00s)
@@ -213,33 +214,33 @@ func ExampleEvent_String() {
 	// ✔ It works (0.00s)
 }
 
-func ExampleEvent_Relevant_true() {
+func ExampleEvent_IsFinishedTest_true() {
 	event := gotestdox.Event{
 		Action: "pass",
 		Test:   "TestItWorks",
 	}
-	fmt.Println(event.Relevant())
+	fmt.Println(event.IsFinishedTest())
 	// Output:
 	// true
 }
 
-func ExampleEvent_Relevant_false() {
+func ExampleEvent_IsFinishedTest_false() {
 	event := gotestdox.Event{
 		Action: "fail",
 		Test:   "ExampleIsIrrelevant",
 	}
-	fmt.Println(event.Relevant())
+	fmt.Println(event.IsFinishedTest())
 	// Output:
 	// false
 }
 
 func ExampleParseJSON() {
-	input := `{"Action":"pass","Package":"demo","Test":"TestItWorks","Elapsed":0.2}`
+	input := `{"Action":"pass","Package":"demo","Test":"TestItWorks","Output":"test","Elapsed":0.2}`
 	event, err := gotestdox.ParseJSON(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("%#v\n", event)
 	// Output:
-	// gotestdox.Event{Action:"pass", Package:"demo", Test:"TestItWorks", Sentence:"", Elapsed:0.2}
+	// gotestdox.Event{Action:"pass", Package:"demo", Test:"TestItWorks", Sentence:"", Output:"test", Elapsed:0.2}
 }

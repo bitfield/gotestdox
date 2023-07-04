@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -37,7 +38,7 @@ func NewTestDoxer() *TestDoxer {
 // stream, including the full command line that was run. If all tests passed,
 // td.OK will be true. If there was a test failure, or 'go test' returned some
 // error, then td.OK will be false.
-func (td *TestDoxer) ExecGoTest(userArgs []string) {
+func (td *TestDoxer) ExecGoTest(userArgs []string, printTestOutput bool) {
 	args := []string{"test", "-json"}
 	args = append(args, userArgs...)
 	cmd := exec.Command("go", args...)
@@ -52,7 +53,7 @@ func (td *TestDoxer) ExecGoTest(userArgs []string) {
 		return
 	}
 	td.Stdin = goTestOutput
-	td.Filter()
+	td.Filter(printTestOutput)
 	if err := cmd.Wait(); err != nil {
 		td.OK = false
 		fmt.Fprintln(td.Stderr, cmd.Args, err)
@@ -60,18 +61,28 @@ func (td *TestDoxer) ExecGoTest(userArgs []string) {
 	}
 }
 
+var filenameAndLineMatcher *regexp.Regexp = regexp.MustCompile(`^.*\.go:\d*:`)
+
+type testOutput struct {
+	filenameAndLine string
+	logOutput       string
+}
+
 // Filter reads from td's Stdin stream, line by line, processing JSON records
 // emitted by 'go test -json'.
 //
 // For each Go package it sees records about, it will print the full name of
 // the package to td.Stdout, followed by a line giving the pass/fail status and
-// the prettified name of each test, sorted alphabetically.
+// the prettified name of each test, sorted alphabetically. It can also
+// print the output of the tests if the "printTestOutput" parameter is set to
+// true.
 //
 // If all tests passed, td.OK will be true at the end. If not, or if there was
 // a parsing error, it will be false. Errors will be reported to td.Stderr.
-func (td *TestDoxer) Filter() {
+func (td *TestDoxer) Filter(printTestOutput bool) {
 	td.OK = true
 	results := map[string][]Event{}
+	testOutputs := map[string][]testOutput{}
 	scanner := bufio.NewScanner(td.Stdin)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
@@ -91,12 +102,30 @@ func (td *TestDoxer) Filter() {
 			})
 			for _, r := range tests {
 				fmt.Fprintln(td.Stdout, r.String())
+				if tos, ok := testOutputs[r.Test]; ok {
+					fmt.Fprintln(td.Stdout, "     Output:")
+					for _, to := range tos {
+						fmt.Fprintf(td.Stdout, "       %s\n", to.filenameAndLine)
+						fmt.Fprintf(td.Stdout, "         %s\n", to.logOutput)
+					}
+				}
 			}
 			fmt.Fprintln(td.Stdout)
 		}
-		if event.Relevant() {
+		if event.IsFinishedTest() {
 			event.Sentence = Prettify(event.Test)
 			results[event.Package] = append(results[event.Package], event)
+		}
+
+		//We save the outputs related to test that match the filenameAndLineMatcher regexp
+		//which should only correspond to test output you've explicitly added to your test/code
+		if printTestOutput && event.IsOutput() {
+			loc := filenameAndLineMatcher.FindIndex([]byte(event.Output))
+			if loc != nil {
+				filenameAndLine := strings.TrimSpace(event.Output[loc[0]:loc[1]])
+				logOutput := event.Output[loc[1]+1:]
+				testOutputs[event.Test] = append(testOutputs[event.Test], testOutput{filenameAndLine, logOutput})
+			}
 		}
 	}
 }
@@ -110,6 +139,7 @@ type Event struct {
 	Package  string
 	Test     string
 	Sentence string
+	Output   string
 	Elapsed  float64
 }
 
@@ -132,16 +162,23 @@ func (e Event) String() string {
 	return fmt.Sprintf(" %s %s (%.2fs)", status, e.Sentence, e.Elapsed)
 }
 
-// Relevant determines whether or not the test event is one that we are
-// interested in (namely, a pass or fail event on a test). Events on non-tests
+// IsFinishedTest determines whether or not the test event represent that the
+// test has finished (namely, a pass or fail event on a test). Events on non-tests
 // (for example, examples) are ignored, and all events on tests other than pass
 // or fail events (for example, run or pause events) are also ignored.
-func (e Event) Relevant() bool {
+func (e Event) IsFinishedTest() bool {
 	// Events on non-tests are irrelevant
 	if !strings.HasPrefix(e.Test, "Test") {
 		return false
 	}
 	if e.Action == "pass" || e.Action == "fail" {
+		return true
+	}
+	return false
+}
+
+func (e Event) IsOutput() bool {
+	if e.Action == "output" {
 		return true
 	}
 	return false
@@ -176,11 +213,26 @@ func ParseJSON(line string) (Event, error) {
 // binary is 0 if the tests passed, or 1 if the tests failed, or there was some
 // error.
 func Main() int {
+	userArgs := os.Args[1:]
+	//Overloading the -v flag to make gotestdox behave as
+	//the "standard" go test without the -json flag. I.e.
+	//print the output of both failed and successful tests.
+	//(-v is completely ignored by the go test command
+	//in combination of the -json flag)
+	printTestOutput := false
+	for i, userArg := range userArgs {
+		if strings.TrimSpace(userArg) == "-v" {
+			printTestOutput = true
+			userArgs[i] = userArgs[len(userArgs)-1]
+			userArgs = userArgs[:len(userArgs)-1]
+			break
+		}
+	}
 	td := NewTestDoxer()
 	if isatty.IsTerminal(os.Stdin.Fd()) {
-		td.ExecGoTest(os.Args[1:])
+		td.ExecGoTest(userArgs, printTestOutput)
 	} else {
-		td.Filter()
+		td.Filter(printTestOutput)
 	}
 	if !td.OK {
 		return 1
