@@ -1,0 +1,2 @@
+exec gotestdox -h
+stdout 'Usage'

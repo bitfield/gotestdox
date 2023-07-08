@@ -6,6 +6,7 @@ cmp stdout golden.txt
 {"Action":"run","Package":"dummy","Test":"TestDummy"}
 {"Action":"output","Package":"dummy","Test":"TestDummy","Output":"=== RUN   TestDummy\n"}
 {"Action":"output","Package":"dummy","Test":"TestDummy","Output":"--- FAIL: TestDummy (0.00s)\n"}
+{"Action":"output","Package":"dummy","Test":"TestDummy","Output":"    dummy_test.go:23: oh no\n"}
 {"Action":"fail","Package":"dummy","Test":"TestDummy"}
 {"Action":"output","Package":"dummy","Output":"FAIL\n"}
 {"Action":"output","Package":"dummy","Output":"exit status 1\n"}
@@ -14,4 +15,5 @@ cmp stdout golden.txt
 -- golden.txt --
 dummy:
  x Dummy (0.00s)
+    dummy_test.go:23: oh no
 

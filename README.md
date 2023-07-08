@@ -58,7 +58,7 @@ Some more advanced ways to use `gotestdox`:
 
 ## Exit status
 
-If there are any test failures, `gotestdox` will report exit status 1.
+If there are any test failures, `gotestdox` will print the output messages from the offending test and report status 1 on exit.
 
 ## Colour
 
@@ -94,7 +94,8 @@ github.com/octocat/mymodule/api:
  ✔ NewServer returns a correctly configured server (0.00s)
 
 github.com/octocat/mymodule/util:
- ✔ LeftPad adds the correct number of leading spaces (0.00s)
+ x LeftPad adds the correct number of leading spaces (0.00s)
+    util_test.go:133: want "  dummy", got " dummy"
  ```
 
 ## Multi-word function names

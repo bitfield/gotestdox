@@ -14,6 +14,43 @@ import (
 	"github.com/mattn/go-isatty"
 )
 
+const Usage = `gotestdox is a command-line tool for turning Go test names into readable sentences.
+
+Usage:
+
+	gotestdox [ARGS]
+
+This will run 'go test -json [ARGS]' in the current directory and format the results in a readable
+way. You can use any arguments that 'go test -json' accepts, including a list of packages, for
+example.
+
+If the standard input is not an interactive terminal, gotestdox will assume you want to pipe JSON
+data into it. For example:
+
+	go test -json |gotestdox
+
+See https://github.com/bitfield/gotestdox for more information.`
+
+// Main runs the command-line interface for gotestdox. The exit status for the
+// binary is 0 if the tests passed, or 1 if the tests failed, or there was some
+// error.
+func Main() int {
+	if len(os.Args) > 1 && os.Args[1] == "-h" {
+		fmt.Println(Usage)
+		return 0
+	}
+	td := NewTestDoxer()
+	if isatty.IsTerminal(os.Stdin.Fd()) {
+		td.ExecGoTest(os.Args[1:])
+	} else {
+		td.Filter()
+	}
+	if !td.OK {
+		return 1
+	}
+	return 0
+}
+
 // TestDoxer holds the state and config associated with a particular invocation
 // of 'go test'.
 type TestDoxer struct {
@@ -72,6 +109,7 @@ func (td *TestDoxer) ExecGoTest(userArgs []string) {
 func (td *TestDoxer) Filter() {
 	td.OK = true
 	results := map[string][]Event{}
+	outputs := map[string][]string{}
 	scanner := bufio.NewScanner(td.Stdin)
 	for scanner.Scan() {
 		event, err := ParseJSON(scanner.Text())
@@ -80,10 +118,8 @@ func (td *TestDoxer) Filter() {
 			fmt.Fprintln(td.Stderr, err)
 			return
 		}
-		if event.Action == "fail" {
-			td.OK = false
-		}
-		if event.IsPackageResult() {
+		switch {
+		case event.IsPackageResult():
 			fmt.Fprintf(td.Stdout, "%s:\n", event.Package)
 			tests := results[event.Package]
 			sort.Slice(tests, func(i, j int) bool {
@@ -91,14 +127,35 @@ func (td *TestDoxer) Filter() {
 			})
 			for _, r := range tests {
 				fmt.Fprintln(td.Stdout, r.String())
+				if r.Action == "fail" {
+					for _, line := range outputs[r.Test] {
+						fmt.Fprint(td.Stdout, line)
+					}
+				}
 			}
 			fmt.Fprintln(td.Stdout)
-		}
-		if event.Relevant() {
+		case event.IsOutput():
+			outputs[event.Test] = append(outputs[event.Test], event.Output)
+		case event.IsTestResult():
 			event.Sentence = Prettify(event.Test)
 			results[event.Package] = append(results[event.Package], event)
+			if event.Action == "fail" {
+				td.OK = false
+			}
 		}
 	}
+}
+
+// ParseJSON takes a string representing a single JSON test record as emitted
+// by 'go test -json', and attempts to parse it into an [Event], returning any
+// parsing error encountered.
+func ParseJSON(line string) (Event, error) {
+	event := Event{}
+	err := json.Unmarshal([]byte(line), &event)
+	if err != nil {
+		return Event{}, fmt.Errorf("parsing JSON: %w\ninput: %s", err, line)
+	}
+	return event, nil
 }
 
 // Event represents a Go test event as recorded by the 'go test -json' command.
@@ -110,6 +167,7 @@ type Event struct {
 	Package  string
 	Test     string
 	Sentence string
+	Output   string
 	Elapsed  float64
 }
 
@@ -132,11 +190,11 @@ func (e Event) String() string {
 	return fmt.Sprintf(" %s %s (%.2fs)", status, e.Sentence, e.Elapsed)
 }
 
-// Relevant determines whether or not the test event is one that we are
+// IsTestResult determines whether or not the test event is one that we are
 // interested in (namely, a pass or fail event on a test). Events on non-tests
 // (for example, examples) are ignored, and all events on tests other than pass
 // or fail events (for example, run or pause events) are also ignored.
-func (e Event) Relevant() bool {
+func (e Event) IsTestResult() bool {
 	// Events on non-tests are irrelevant
 	if !strings.HasPrefix(e.Test, "Test") {
 		return false
@@ -160,30 +218,18 @@ func (e Event) IsPackageResult() bool {
 	return false
 }
 
-// ParseJSON takes a string representing a single JSON test record as emitted
-// by 'go test -json', and attempts to parse it into an [Event], returning any
-// parsing error encountered.
-func ParseJSON(line string) (Event, error) {
-	event := Event{}
-	err := json.Unmarshal([]byte(line), &event)
-	if err != nil {
-		return Event{}, fmt.Errorf("parsing JSON: %w\ninput: %s", err, line)
+// IsOutput determines whether or not the event is a test output (for example
+// from [testing.T.Error]), excluding status messages automatically generated
+// by 'go test' such as "--- FAIL: ..." or "=== RUN / PAUSE / CONT".
+func (e Event) IsOutput() bool {
+	if e.Action != "output" {
+		return false
 	}
-	return event, nil
-}
-
-// Main runs the command-line interface for gotestdox. The exit status for the
-// binary is 0 if the tests passed, or 1 if the tests failed, or there was some
-// error.
-func Main() int {
-	td := NewTestDoxer()
-	if isatty.IsTerminal(os.Stdin.Fd()) {
-		td.ExecGoTest(os.Args[1:])
-	} else {
-		td.Filter()
+	if strings.HasPrefix(e.Output, "---") {
+		return false
 	}
-	if !td.OK {
-		return 1
+	if strings.HasPrefix(e.Output, "===") {
+		return false
 	}
-	return 0
+	return true
 }

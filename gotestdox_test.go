@@ -83,7 +83,7 @@ func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 		},
 	}
 	for _, event := range tcs {
-		relevant := event.Relevant()
+		relevant := event.IsTestResult()
 		if !relevant {
 			t.Errorf("false for relevant event %q on %q", event.Action, event.Test)
 		}
@@ -115,7 +115,7 @@ func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
 		},
 	}
 	for _, event := range tcs {
-		relevant := event.Relevant()
+		relevant := event.IsTestResult()
 		if relevant {
 			t.Errorf("true for irrelevant event %q on %q", event.Action, event.Test)
 		}
@@ -213,33 +213,33 @@ func ExampleEvent_String() {
 	// ✔ It works (0.00s)
 }
 
-func ExampleEvent_Relevant_true() {
+func ExampleEvent_IsTestResult_true() {
 	event := gotestdox.Event{
 		Action: "pass",
 		Test:   "TestItWorks",
 	}
-	fmt.Println(event.Relevant())
+	fmt.Println(event.IsTestResult())
 	// Output:
 	// true
 }
 
-func ExampleEvent_Relevant_false() {
+func ExampleEvent_IsTestResult_false() {
 	event := gotestdox.Event{
 		Action: "fail",
 		Test:   "ExampleIsIrrelevant",
 	}
-	fmt.Println(event.Relevant())
+	fmt.Println(event.IsTestResult())
 	// Output:
 	// false
 }
 
 func ExampleParseJSON() {
-	input := `{"Action":"pass","Package":"demo","Test":"TestItWorks","Elapsed":0.2}`
+	input := `{"Action":"pass","Package":"demo","Test":"TestItWorks","Output":"","Elapsed":0.2}`
 	event, err := gotestdox.ParseJSON(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("%#v\n", event)
 	// Output:
-	// gotestdox.Event{Action:"pass", Package:"demo", Test:"TestItWorks", Sentence:"", Elapsed:0.2}
+	// gotestdox.Event{Action:"pass", Package:"demo", Test:"TestItWorks", Sentence:"", Output:"", Elapsed:0.2}
 }
