@@ -70,7 +70,7 @@ func TestEventString_FormatsPassAndFailEventsDifferently(t *testing.T) {
 	}
 }
 
-func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
+func TestIsTestResult_IsTrueForTestPassOrFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
 		{
@@ -83,14 +83,13 @@ func TestRelevantIsTrueForTestPassOrFailEvents(t *testing.T) {
 		},
 	}
 	for _, event := range tcs {
-		relevant := event.IsTestResult()
-		if !relevant {
-			t.Errorf("false for relevant event %q on %q", event.Action, event.Test)
+		if !event.IsTestResult() {
+			t.Errorf("false for %q event on %q", event.Action, event.Test)
 		}
 	}
 }
 
-func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
+func TestIsTestResult_IsFalseForNonTestPassFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
 		{
@@ -115,9 +114,8 @@ func TestRelevantIsFalseForNonTestPassFailEvents(t *testing.T) {
 		},
 	}
 	for _, event := range tcs {
-		relevant := event.IsTestResult()
-		if relevant {
-			t.Errorf("true for irrelevant event %q on %q", event.Action, event.Test)
+		if event.IsTestResult() {
+			t.Errorf("true for %q event on %q", event.Action, event.Test)
 		}
 	}
 }
@@ -226,7 +224,7 @@ func ExampleEvent_IsTestResult_true() {
 func ExampleEvent_IsTestResult_false() {
 	event := gotestdox.Event{
 		Action: "fail",
-		Test:   "ExampleIsIrrelevant",
+		Test:   "ExampleEventsShouldBeIgnored",
 	}
 	fmt.Println(event.IsTestResult())
 	// Output:

@@ -16,8 +16,8 @@ go install github.com/bitfield/gotestdox/cmd/gotestdox@latest
 For example, suppose we have some tests named like this:
 
 ```
-TestRelevantIsFalseForNonPassFailEvents
-TestRelevantIsTrueForTestPassOrFailEvents
+TestValidIsTrueForValidInputs
+TestValidIsFalseForInvalidInputs
 ```
 
 We can transform them into straightforward sentences that express the desired behaviour, by running `gotestdox`:
@@ -27,8 +27,8 @@ We can transform them into straightforward sentences that express the desired be
 This will run the tests, and print:
 
 ```
- ✔ Relevant is false for non pass fail events (0.00s)
- ✔ Relevant is true for test pass or fail events (0.00s)
+ ✔ Valid is true for valid inputs (0.00s)
+ ✔ Valid is false for invalid inputs (0.00s)
 ```
 
 # Why?

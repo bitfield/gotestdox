@@ -195,7 +195,7 @@ func (e Event) String() string {
 // (for example, examples) are ignored, and all events on tests other than pass
 // or fail events (for example, run or pause events) are also ignored.
 func (e Event) IsTestResult() bool {
-	// Events on non-tests are irrelevant
+	// Skip events on benchmarks and examples
 	if !strings.HasPrefix(e.Test, "Test") {
 		return false
 	}
