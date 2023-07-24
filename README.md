@@ -5,13 +5,25 @@
 
 ![Writing gopher logo](img/gotestdox.png)
 
-`gotestdox` is a command-line tool for turning Go test names into readable sentences. Here's how to install it:
+`gotestdox` is a command-line tool for formatting Go test results as readable documentation, as recommended in my book [The Power of Go: Tests](https://bitfieldconsulting.com/books/tests).
+
+Here's how to install it:
 
 ```
 go install github.com/bitfield/gotestdox/cmd/gotestdox@latest
 ```
 
-# What?
+In any Go project, run:
+
+```
+gotestdox ./...
+```
+
+![Animated demo](img/demo.gif)
+
+# What does it do?
+
+`gotestdox` runs your tests and reports the results, but it formats their names in a special way. It converts test names WrittenInCamelCase into ordinary sentences.
 
 For example, suppose we have some tests named like this:
 
@@ -20,7 +32,7 @@ TestValidIsTrueForValidInputs
 TestValidIsFalseForInvalidInputs
 ```
 
-We can transform them into straightforward sentences that express the desired behaviour, by running `gotestdox`:
+We can transform them into readably-spaced sentences that express the desired behaviour, by running `gotestdox`:
 
 **`gotestdox`**
 
