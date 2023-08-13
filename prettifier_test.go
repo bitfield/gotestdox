@@ -234,4 +234,9 @@ var Cases = []struct {
 		input: "TestShiftTransforms255To0",
 		want:  "Shift transforms 255 to 0",
 	},
+	{
+		name:  "correctly formats fuzz test names",
+		input: "FuzzPrettify",
+		want:  "[fuzz] Prettify",
+	},
 }

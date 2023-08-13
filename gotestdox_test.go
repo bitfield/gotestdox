@@ -70,6 +70,36 @@ func TestEventString_FormatsPassAndFailEventsDifferently(t *testing.T) {
 	}
 }
 
+func TestIsFuzzFail_IsTrueForFuzzFailEvents(t *testing.T) {
+	t.Parallel()
+	event := gotestdox.Event{
+		Action: "fail",
+		Test:   "FuzzBar",
+	}
+	if !event.IsFuzzFail() {
+		t.Errorf("false for %q event on %q", event.Action, event.Test)
+	}
+}
+
+func TestIsFuzzFail_IsFalseForNonFuzzFailEvents(t *testing.T) {
+	t.Parallel()
+	tcs := []gotestdox.Event{
+		{
+			Action: "pass",
+			Test:   "FuzzBar",
+		},
+		{
+			Action: "fail",
+			Test:   "TestFooDoesX",
+		},
+	}
+	for _, event := range tcs {
+		if event.IsFuzzFail() {
+			t.Errorf("true for %q event on %q", event.Action, event.Test)
+		}
+	}
+}
+
 func TestIsTestResult_IsTrueForTestPassOrFailEvents(t *testing.T) {
 	t.Parallel()
 	tcs := []gotestdox.Event{
@@ -107,6 +137,10 @@ func TestIsTestResult_IsFalseForNonTestPassFailEvents(t *testing.T) {
 		{
 			Action: "fail",
 			Test:   "",
+		},
+		{
+			Action: "pass",
+			Test:   "FuzzBar",
 		},
 		{
 			Action: "run",
