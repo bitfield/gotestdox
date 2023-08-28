@@ -7,7 +7,7 @@ import (
 	"testing"
 	"unicode"
 
-	"github.com/bitfield/gotestdox"
+	"github.com/bitfield/gotestdox/pkg/gotestdox"
 )
 
 func FuzzPrettify(f *testing.F) {
