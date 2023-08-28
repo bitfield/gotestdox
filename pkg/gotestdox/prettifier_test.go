@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bitfield/gotestdox"
+	"github.com/bitfield/gotestdox/pkg/gotestdox"
 	"github.com/google/go-cmp/cmp"
 )
 
