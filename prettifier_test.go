@@ -22,7 +22,7 @@ func TestPrettify(t *testing.T) {
 
 func BenchmarkPrettify(b *testing.B) {
 	input := "TestParseJSON_CorrectlyParsesASingleGoTestJSONOutputLine"
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		_ = gotestdox.Prettify(input)
 	}
 }
