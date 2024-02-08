@@ -1,11 +1,11 @@
 # Based on https://github.com/mvdan/github-actions-golang
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 name: Tests
 jobs:
   test:
     strategy:
       matrix:
-        go-version: ['stable', 'oldstable']
+        go-version: ['stable']
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: 1.22.0
   gocritic:
     runs-on: ubuntu-latest
     steps:
