@@ -1,6 +1,6 @@
 # Based on https://github.com/mvdan/github-actions-golang
-on: [push, pull_request, workflow_dispatch]
-name: Tests
+on: [pull_request, workflow_dispatch]
+name: CI
 jobs:
   test:
     strategy:
@@ -18,8 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: golang/govulncheck-action@v1
-        with:
-          go-version-input: 1.22.0
   gocritic:
     runs-on: ubuntu-latest
     steps:
