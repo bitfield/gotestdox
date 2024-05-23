@@ -1,6 +1,6 @@
 module github.com/bitfield/gotestdox
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/fatih/color v1.15.0
