@@ -1,7 +1,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/bitfield/gotestdox.svg)](https://pkg.go.dev/github.com/bitfield/gotestdox)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bitfield/gotestdox)](https://goreportcard.com/report/github.com/bitfield/gotestdox)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/avelino/awesome-go)
-![Tests](https://github.com/bitfield/gotestdox/actions/workflows/test.yml/badge.svg)
+![CI](https://github.com/bitfield/gotestdox/actions/workflows/ci.yml/badge.svg)
+![Audit](https://github.com/bitfield/gotestdox/actions/workflows/audit.yml/badge.svg)
 
 ![Writing gopher logo](img/gotestdox.png)
 
