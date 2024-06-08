@@ -1,0 +1,15 @@
+name: Security audit
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  security_audit:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: golang/govulncheck-action@v1
+          with:
+            go-version-input: 'stable'
+            check-latest: true
+  
