@@ -4,6 +4,8 @@
 ![CI](https://github.com/bitfield/gotestdox/actions/workflows/ci.yml/badge.svg)
 ![Audit](https://github.com/bitfield/gotestdox/actions/workflows/audit.yml/badge.svg)
 
+[Subscribe to learn Go with me!](https://bitfieldconsulting.com/subscribe)
+
 ![Writing gopher logo](img/gotestdox.png)
 
 `gotestdox` is a command-line tool for formatting Go test results as readable documentation, as recommended in my book [The Power of Go: Tests](https://bitfieldconsulting.com/books/tests).
@@ -177,7 +179,7 @@ It seems that I'm not the only one who finds this idea useful. I hear that `gote
 
 # Links
 
-- [Bitfield Consulting](https://bitfieldconsulting.com/)
+- [Bitfield Consulting](https://bitfieldconsulting.com/subscribe)
 - [Test names should be sentences](https://bitfieldconsulting.com/golang/test-names)
 - [The Power of Go: Tests](https://bitfieldconsulting.com/books/tests)
 
